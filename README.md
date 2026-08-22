@@ -173,6 +173,60 @@ in that list. Without this rule, a proxy could make every visitor look local.
 
 ---
 
+## Deploy with Docker and Coolify
+
+A workflow builds an image and sends it to the GitHub Container Registry on
+every push to `main` and on every `v*` tag. The image holds the relay and the
+web page, for `linux/amd64` and for `linux/arm64`.
+
+```
+ghcr.io/magdielcas/magi-live-actor-sheets:latest
+```
+
+### In Coolify
+
+1. Add a new resource, and select **Docker Image**.
+2. Use the image name above. Coolify can also read `compose.yaml` from this
+   repository.
+3. Set the port to **30001**.
+4. Set the environment variable `MAGI_BRIDGE_SECRET` to a long secret. Put the
+   same text in the Foundry module settings.
+5. Give the service the same domain as your Foundry server, or a sub-domain of
+   it, for example `foundry.example.com/magi` or `magi.example.com`. The server
+   refuses a page from any other domain.
+
+Coolify ends the TLS connection and sends the WebSocket to the container, so
+you do not need any other setting.
+
+### Two points that matter
+
+**Always set `MAGI_BRIDGE_SECRET`.** Without it the server makes a new secret
+at each start. After a restart the module then holds the old secret, and the
+bridge cannot connect.
+
+**Leave `MAGI_TRUST_LAN` off.** The image turns it off, and it must stay off
+behind a proxy. LAN trust lets a client on a private address open a sheet with
+no pairing code. Behind the Coolify proxy every request arrives from the Docker
+network, and a Docker network uses private addresses. With LAN trust on, the
+server would treat every visitor from the internet as a member of your network,
+and any person could open any character sheet. Each device must pair with a
+code instead.
+
+If you do want LAN trust behind a proxy, you must also set
+`MAGI_TRUSTED_PROXIES` to the address of that proxy. The server then reads the
+real client address from `X-Forwarded-For`.
+
+### Build the image yourself
+
+```bash
+docker build -t magi-live-actor-sheets .
+docker run --rm -p 30001:30001 \
+  -e MAGI_BRIDGE_SECRET="choose-a-long-secret" \
+  magi-live-actor-sheets
+```
+
+---
+
 ## Settings
 
 | Environment variable | Flag | Default | Purpose |

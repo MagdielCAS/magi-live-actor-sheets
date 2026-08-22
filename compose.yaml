@@ -1,0 +1,27 @@
+# A Coolify deployment, next to the Foundry server.
+#
+# Set MAGI_BRIDGE_SECRET in the Coolify environment panel. It must be the
+# same text as the bridge secret in the Foundry module settings.
+#
+# Read the security note in the Dockerfile before you turn MAGI_TRUST_LAN
+# on again.
+
+services:
+  magi:
+    image: ghcr.io/magdielcas/magi-live-actor-sheets:latest
+    restart: unless-stopped
+    environment:
+      # Required. Without it the server makes a new secret at every start,
+      # and the module then cannot connect after a restart.
+      MAGI_BRIDGE_SECRET: ${MAGI_BRIDGE_SECRET:?set this in Coolify}
+
+      # Every visitor must pair with a code. See the Dockerfile.
+      MAGI_TRUST_LAN: "false"
+    expose:
+      - "30001"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:30001/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
