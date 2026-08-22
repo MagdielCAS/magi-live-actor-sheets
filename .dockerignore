@@ -1,9 +1,20 @@
-# The image needs only server/ and web/.
+# The image needs server/, web/, and app/.
+#
+# app/ holds the new page. Its build stage needs the source, and web/js/
+# holds the example character that the build reads, so both stay.
 *
 !server
 !web
+!app
 
 # Nothing from these belongs in the image.
 **/*_test.go
 **/.DS_Store
 server/magi-server
+
+# These two must come after "!app": Docker uses the last pattern that
+# matches. node_modules is not only large, it is wrong: esbuild and rollup
+# carry a binary for one platform, and a copy from the host would replace
+# the one that npm ci made inside the stage.
+app/node_modules
+app/dist

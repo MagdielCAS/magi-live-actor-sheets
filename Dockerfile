@@ -1,5 +1,29 @@
 # syntax=docker/dockerfile:1
 
+# Build the new web page. Like the Go stage below, this runs on the machine
+# architecture of the runner: the output is plain text files that do not
+# depend on an architecture, and npm ci under an emulator is very slow.
+#
+# BuildKit does not run a stage that no other stage copies from, so this
+# stage costs nothing until the COPY at the end of the file names it. See
+# the note there.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS web
+
+WORKDIR /src/app
+
+# The lock file first, so a change in the source does not make the
+# dependency layer invalid.
+COPY app/package.json app/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY app/ ./
+# The example character lives in the old page, and the build reads it from
+# there. See app/src/dev/fixture.ts.
+COPY web/js/fixture.js /src/web/js/fixture.js
+
+RUN npm run build && npm run check-dist
+
+
 # Build the relay. The build runs on the machine architecture of the runner
 # and cross-compiles for the target, because a Go build does not need an
 # emulator. This is much faster than a build under QEMU.
@@ -27,6 +51,18 @@ RUN apk add --no-cache ca-certificates tzdata \
 
 # The binary looks for the web page in ../web, next to its own directory.
 COPY --from=build /out/magi-server /app/bin/magi-server
+
+# The image still ships the old page.
+#
+# The new page in app/ is a working frame, not yet equal to this one, so it
+# must not reach a player until it is. The change is one line, and this is
+# it:
+#
+#     COPY --from=web /src/app/dist/ /app/web/
+#
+# Until then the "web" stage above is not named by any COPY, so BuildKit
+# skips it and the image build costs nothing extra. The CI workflow builds
+# and tests app/ on its own, so the stage cannot rot in the meantime.
 COPY web/ /app/web/
 
 # The container must listen on every address. The default of the binary is
