@@ -203,8 +203,12 @@ in that list. Without this rule, a proxy could make every visitor look local.
 ## Deploy with Docker and Coolify
 
 A workflow builds an image and sends it to the GitHub Container Registry on
-every push to `main` and on every `v*` tag. The image holds the relay and the
-web page, for `linux/amd64` and for `linux/arm64`.
+every release, which means on every merge into `main`. The image holds the
+relay and the web page, for `linux/amd64` and for `linux/arm64`. A release of
+version 1.2.3 gives the image the tags `1.2.3`, `1.2`, `1`, and `latest`, so a
+deployment can follow a line of releases as narrowly or as loosely as it wants.
+A pull request only builds the image, to prove that the Dockerfile still
+works.
 
 ```
 ghcr.io/magdielcas/magi-live-actor-sheets:latest
@@ -256,16 +260,40 @@ real client address from `X-Forwarded-For`.
 
 ### Release a new version of the module
 
-Push a tag, and a workflow builds `module.zip`, writes the version into
-`module.json`, and publishes the release that the manifest address points at:
+Every merge into `main` is a release. Nothing has to be tagged by hand: the
+workflow works out the next version, builds `module.zip`, writes the version
+into `module.json`, makes the `v*` tag on the merged commit, and publishes the
+release that the manifest address points at.
+
+**The name of the branch says how big the step is.** Give the branch a prefix:
+
+| Branch | Step | 1.4.2 becomes |
+|---|---|---|
+| `major/...`, `breaking/...` | major | `2.0.0` |
+| `minor/...`, `feat/...`, `feature/...` | minor | `1.5.0` |
+| `patch/...`, `fix/...`, `hotfix/...`, `chore/...`, `docs/...`, `refactor/...`, `perf/...`, `test/...`, `ci/...`, `build/...`, `style/...`, `revert/...`, `deps/...` | patch | `1.4.3` |
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git switch -c minor/character-sheet-tabs
 ```
 
-The same tag also gives the container image its version numbers. You can also
-start **Release the module** by hand from the Actions tab and give the version.
+A branch with none of these prefixes makes a patch release, and the workflow
+leaves a warning on the run to say so. A `-` works in place of the `/`, so
+`fix-the-hit-points` is a patch release as well.
+
+The newest `v*` tag is the version the repository is at, and the version in
+`module/module.json` in the working tree is only the starting point for the
+first release. The workflow writes the real version into the manifest as it
+builds, so that file never has to be edited for a release.
+
+Two words in the merge commit message change what happens:
+
+- `[major]`, `[minor]` or `[patch]` decide the step, whatever the branch is
+  called.
+- `[skip release]` makes no release at all.
+
+You can also start **Release the module** by hand from the Actions tab and
+choose the step, or give an exact version.
 
 ### Build the image yourself
 

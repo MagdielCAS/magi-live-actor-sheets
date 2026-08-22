@@ -1,7 +1,21 @@
 name: Release the module
 
-# Makes the release that Foundry installs from. Push a tag such as v0.1.0,
-# or start this workflow by hand and give the version.
+# Every push to main is a release. The size of the step comes from the name of
+# the branch that was merged, so the branch name says what kind of release it
+# is:
+#
+#   major/...  or breaking/...              1.4.2 -> 2.0.0
+#   minor/...  or feat/... feature/...      1.4.2 -> 1.5.0
+#   patch/...  or fix/... hotfix/... and    1.4.2 -> 1.4.3
+#              the other usual prefixes
+#
+# A branch with no prefix that this workflow knows makes a patch release. The
+# merge commit message can also say [major], [minor] or [patch] to decide by
+# hand, and [skip release] to make no release at all.
+#
+# The newest v* tag is the version this repository is at. The workflow writes
+# the next version into the manifest as it builds, so nothing in the working
+# tree has to be kept up to date by hand.
 #
 # The release holds two files:
 #   module.json  the manifest, which Foundry reads to find the version
@@ -9,45 +23,205 @@ name: Release the module
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
   workflow_dispatch:
     inputs:
+      bump:
+        description: "The size of the version step"
+        type: choice
+        options: [patch, minor, major]
+        default: patch
       version:
-        description: "The version to release, for example 0.1.0"
-        required: true
+        description: "An exact version, for example 0.1.0. Leave this empty to use the step above."
+        required: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
-    name: Build and publish the module
+  version:
+    name: Work out the next version
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      release: ${{ steps.pick.outputs.release }}
+      version: ${{ steps.pick.outputs.version }}
+      tag: ${{ steps.pick.outputs.tag }}
+      bump: ${{ steps.pick.outputs.bump }}
+      branch: ${{ steps.pick.outputs.branch }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          # The whole history, because the newest tag is the current version.
+          fetch-depth: 0
 
-      - name: Read the version
-        id: version
+      - name: Read the branch, the step, and the next version
+        id: pick
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          EVENT: ${{ github.event_name }}
+          INPUT_BUMP: ${{ inputs.bump }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            version="${{ inputs.version }}"
-          else
-            version="${GITHUB_REF_NAME#v}"
+          set -euo pipefail
+
+          message="$(git log -1 --pretty=%B "$SHA")"
+
+          if printf '%s' "$message" | grep -qiF '[skip release]'; then
+            echo "The commit says [skip release], so this push makes no release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          branch=""
+          bump=""
+
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            bump="$INPUT_BUMP"
+          else
+            # The merged branch. This answer covers a merge commit, a squash,
+            # and a rebase alike, because it asks which pull request the commit
+            # belongs to.
+            branch="$(gh api "repos/$REPO/commits/$SHA/pulls" \
+              --jq '.[0].head.ref // empty' 2>/dev/null || true)"
+
+            # A merge commit still names the branch when the question above
+            # cannot be answered, for example on a push with no pull request.
+            if [ -z "$branch" ]; then
+              branch="$(printf '%s\n' "$message" \
+                | sed -n 's|^Merge pull request #[0-9]* from [^/]*/\(.*\)$|\1|p' \
+                | head -1)"
+            fi
+          fi
+
+          if [ -z "$bump" ]; then
+            # The first word of the branch name, up to the / or the - that
+            # follows it. A name such as feature/live-sync gives "feature".
+            prefix="$(printf '%s' "$branch" \
+              | tr '[:upper:]' '[:lower:]' \
+              | sed 's|[/-].*||')"
+
+            case "$prefix" in
+              major|breaking)
+                bump=major ;;
+              minor|feat|feature)
+                bump=minor ;;
+              patch|fix|hotfix|bugfix|chore|docs|doc|refactor|perf|test|tests|ci|build|style|revert|deps)
+                bump=patch ;;
+              *)
+                bump=patch
+                if [ -n "$branch" ]; then
+                  echo "::warning::The branch '$branch' has no prefix that says major, minor or patch, so this is a patch release. Name the branch major/..., minor/... or patch/... to choose the size of the step."
+                else
+                  echo "::warning::No branch could be found for this commit, so this is a patch release. Merge through a pull request from a branch named major/..., minor/... or patch/... to choose the size of the step."
+                fi ;;
+            esac
+          fi
+
+          # The commit message has the last word, so a release can be corrected
+          # without renaming a branch.
+          case "$message" in
+            *'[major]'*) bump=major ;;
+            *'[minor]'*) bump=minor ;;
+            *'[patch]'*) bump=patch ;;
+          esac
+
+          # The newest v* tag is where this repository is now. Before the first
+          # tag exists, the manifest in the working tree says where it is.
+          # The || true matters: before the first tag, grep finds nothing and
+          # ends with an error, and this script stops on an error.
+          current="$(git tag -l 'v*' \
+            | sed 's|^v||' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -t. -k1,1n -k2,2n -k3,3n \
+            | tail -1 || true)"
+          if [ -z "$current" ]; then
+            current="$(jq -r '.version' module/module.json)"
+            echo "There is no v* tag yet, so the manifest gives the current version $current."
+          fi
+
+          if [ -n "${INPUT_VERSION:-}" ]; then
+            version="$INPUT_VERSION"
+          else
+            major="${current%%.*}"
+            rest="${current#*.}"
+            minor="${rest%%.*}"
+            patch="${rest#*.}"
+            case "$bump" in
+              major) major=$((major + 1)); minor=0; patch=0 ;;
+              minor) minor=$((minor + 1)); patch=0 ;;
+              patch) patch=$((patch + 1)) ;;
+            esac
+            version="$major.$minor.$patch"
+          fi
+
           case "$version" in
             [0-9]*.[0-9]*.[0-9]*) ;;
             *) echo "The version must look like 1.2.3, but it is '$version'." >&2; exit 1 ;;
           esac
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+          if git rev-parse -q --verify "refs/tags/v$version" > /dev/null; then
+            echo "The tag v$version already exists. Nothing can be released over it." >&2
+            exit 1
+          fi
+
+          if [ -n "$branch" ]; then
+            echo "The branch '$branch' makes a $bump release: $current -> $version."
+          else
+            echo "This push makes a $bump release: $current -> $version."
+          fi
+          {
+            echo "release=true"
+            echo "branch=$branch"
+            echo "bump=$bump"
+            echo "version=$version"
+            echo "tag=v$version"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Release v$version"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Branch | \`${branch:-none}\` |"
+            echo "| Step | $bump |"
+            echo "| Version | $current → $version |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # The same workflow that checks a pull request also builds the image for the
+  # release, so the release only happens after the server passes its checks.
+  image:
+    name: Check the server and publish the image
+    needs: version
+    if: needs.version.outputs.release == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+
+  release:
+    name: Build and publish the module
+    needs: [version, image]
+    if: needs.version.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
 
       # The manifest address always points at the newest release, so Foundry
       # can find an update. The download address names this one release, so
       # an older manifest never brings back a newer file.
       - name: Put the version and the addresses in the manifest
         env:
-          VERSION: ${{ steps.version.outputs.version }}
-          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ needs.version.outputs.version }}
+          TAG: ${{ needs.version.outputs.tag }}
           REPO: ${{ github.repository }}
         run: |
           mkdir -p dist
@@ -77,14 +251,21 @@ jobs:
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.version.outputs.tag }}
+          TAG: ${{ needs.version.outputs.tag }}
+          BUMP: ${{ needs.version.outputs.bump }}
+          BRANCH: ${{ needs.version.outputs.branch }}
+          SHA: ${{ github.sha }}
         run: |
+          # The tag is made here, on the commit that is being released.
+          #
           # Upload the files by their real names. A name after a # would
           # be only a label, and Foundry asks for the name.
           gh release create "$TAG" \
             dist/module.json \
             dist/module.zip \
+            --target "$SHA" \
             --title "$TAG" \
+            --notes "A $BUMP release${BRANCH:+, from the branch \`$BRANCH\`}." \
             --generate-notes
 
       # The address in the manifest is the one Foundry uses, so prove that
@@ -92,16 +273,21 @@ jobs:
       - name: Check the published address
         env:
           REPO: ${{ github.repository }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
           url="https://github.com/$REPO/releases/latest/download/module.json"
-          for attempt in 1 2 3 4 5; do
-            if curl -fsSL "$url" -o published.json; then
-              jq -e '.id == "magi-live-actor-sheets"' published.json > /dev/null
-              echo "$url answers, and it holds version $(jq -r .version published.json)."
+          for attempt in 1 2 3 4 5 6; do
+            # A release takes a moment to become the latest one, so an answer
+            # that still holds the version before this one is not a failure
+            # yet. Only the last attempt decides.
+            if curl -fsSL "$url" -o published.json \
+              && jq -e '.id == "magi-live-actor-sheets"' published.json > /dev/null \
+              && jq -e --arg version "$VERSION" '.version == $version' published.json > /dev/null; then
+              echo "$url answers, and it holds version $VERSION."
               exit 0
             fi
-            echo "Attempt $attempt: the address does not answer yet. Waiting."
+            echo "Attempt $attempt: the address does not hold $VERSION yet. Waiting."
             sleep 5
           done
-          echo "The manifest address never answered. Foundry could not install this." >&2
+          echo "The manifest address never answered with version $VERSION. Foundry could not install this." >&2
           exit 1
