@@ -225,10 +225,15 @@ To get a token, the device redeems a pairing code:
 
 The page keeps the token in `localStorage`.
 
-**Same origin.** The server sends no CORS headers. The server also compares the
-WebSocket `Origin` header with the request `Host`. The server refuses a
-connection from a different origin. A page on a different domain therefore
-cannot use the server.
+**Same origin, for the page only.** The server sends no CORS headers. On
+`/ws/client` the server compares the WebSocket `Origin` header with the request
+`Host`, and it refuses a different origin. The server sends the page itself, so
+the two always agree, and a page on another domain cannot use the server.
+
+`/ws/bridge` has no such test, and it must not have one. The bridge is the Game
+Master tab of Foundry. That page comes from the Foundry address and opens the
+socket on the relay address, so the two are different by nature. The shared
+secret guards that endpoint instead.
 
 ## 8. Write allowlist
 

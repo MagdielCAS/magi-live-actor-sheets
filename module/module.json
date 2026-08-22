@@ -2,7 +2,7 @@
   "id": "magi-live-actor-sheets",
   "title": "Magi Live Actor Sheets",
   "description": "Shows a live character sheet on a phone or a tablet. The sheet synchronizes in both directions with Foundry VTT.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "authors": [
     {
       "name": "Magdiel Campelo",
