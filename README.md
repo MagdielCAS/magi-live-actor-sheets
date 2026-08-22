@@ -72,7 +72,17 @@ and prints it. Copy it into the module settings, or the module cannot connect.
 
 ### 2. Install the module in Foundry
 
-Copy or link the `module` directory into your Foundry data directory:
+In Foundry, open **Add-on Modules → Install Module**, and paste this address in
+the **Manifest URL** field:
+
+```
+https://github.com/MagdielCAS/magi-live-actor-sheets/releases/latest/download/module.json
+```
+
+Foundry then also finds later versions by itself.
+
+To work on the module instead, link the `module` directory into your Foundry
+data directory:
 
 ```bash
 ln -s "$PWD/module" "$HOME/.local/share/FoundryVTT/Data/modules/magi-live-actor-sheets"
@@ -196,6 +206,15 @@ web page, for `linux/amd64` and for `linux/arm64`.
 ghcr.io/magdielcas/magi-live-actor-sheets:latest
 ```
 
+The workflow makes the package **private**, because that is what the GitHub
+Container Registry does by default. Coolify cannot pull it until you do one of
+these:
+
+- Open the package settings on GitHub and change the visibility to **public**.
+- Or make a personal access token with only the `read:packages` right, and give
+  it to Coolify as the password for `ghcr.io`, with your GitHub name as the
+  user.
+
 ### In Coolify
 
 1. Add a new resource, and select **Docker Image**.
@@ -230,6 +249,19 @@ code instead.
 If you do want LAN trust behind a proxy, you must also set
 `MAGI_TRUSTED_PROXIES` to the address of that proxy. The server then reads the
 real client address from `X-Forwarded-For`.
+
+### Release a new version of the module
+
+Push a tag, and a workflow builds `module.zip`, writes the version into
+`module.json`, and publishes the release that the manifest address points at:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The same tag also gives the container image its version numbers. You can also
+start **Release the module** by hand from the Actions tab and give the version.
 
 ### Build the image yourself
 
