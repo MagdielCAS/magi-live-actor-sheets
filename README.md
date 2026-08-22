@@ -167,6 +167,19 @@ location /magi/ {
 }
 ```
 
+With this rule the page lives at `https://your-domain/magi/`, so set:
+
+```
+MAGI_PUBLIC_URL=https://your-domain/magi
+```
+
+The final `/` in `proxy_pass` removes `/magi` before the request reaches the
+relay, so the relay cannot find that path again by itself. The pairing QR
+picture would then point at the root of your domain, which is Foundry, and a
+scan would not open the sheet. `MAGI_PUBLIC_URL` tells the relay the address
+that a player uses. You do not need it when the relay has its own domain or
+sub-domain.
+
 If the proxy is on a different machine than the relay, name it in
 `MAGI_TRUSTED_PROXIES`. The server reads `X-Forwarded-For` only from an address
 in that list. Without this rule, a proxy could make every visitor look local.
@@ -194,6 +207,8 @@ ghcr.io/magdielcas/magi-live-actor-sheets:latest
 5. Give the service the same domain as your Foundry server, or a sub-domain of
    it, for example `foundry.example.com/magi` or `magi.example.com`. The server
    refuses a page from any other domain.
+6. If you put the service under a path, such as `/magi`, also set
+   `MAGI_PUBLIC_URL` to that full address. A sub-domain does not need it.
 
 Coolify ends the TLS connection and sends the WebSocket to the container, so
 you do not need any other setting.
@@ -234,6 +249,7 @@ docker run --rm -p 30001:30001 \
 | `MAGI_BIND` | `-bind` | `127.0.0.1:30001` | The address to listen on |
 | `MAGI_BRIDGE_SECRET` | `-bridge-secret` | made for each run | The secret the module must send |
 | `MAGI_TRUST_LAN` | `-trust-lan` | `true` | Let a phone on the network connect with no code |
+| `MAGI_PUBLIC_URL` | empty | The address where a player reaches the page, for example `https://host/magi`. Necessary only when a proxy serves the relay under a path. |
 | `MAGI_TRUSTED_PROXIES` | `-trusted-proxies` | empty | The proxies that may set `X-Forwarded-For` |
 | — | `-web` | `./web` | The directory that holds the web page |
 

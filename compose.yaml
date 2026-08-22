@@ -17,6 +17,13 @@ services:
 
       # Every visitor must pair with a code. See the Dockerfile.
       MAGI_TRUST_LAN: "false"
+
+      # Set this when a proxy serves the relay under a path, for example
+      # https://foundry.example.com/magi. The proxy removes that path
+      # before the request arrives, so the relay cannot find it again, and
+      # the pairing QR picture would point at the wrong place. A service
+      # with its own sub-domain does not need it.
+      # MAGI_PUBLIC_URL: https://foundry.example.com/magi
     expose:
       - "30001"
     healthcheck:

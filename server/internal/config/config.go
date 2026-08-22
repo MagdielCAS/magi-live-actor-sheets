@@ -8,7 +8,9 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 )
 
 const defaultBind = "127.0.0.1:30001"
@@ -25,6 +27,12 @@ type Config struct {
 	// TrustedProxies is a raw comma list of IPs or CIDRs allowed to set
 	// X-Forwarded-For. The httpapi package parses it.
 	TrustedProxies string
+	// PublicURL is the address where a player reaches the page, for
+	// example "https://foundry.example.com/magi". Set it when a proxy
+	// serves the relay under a path, because the proxy removes that path
+	// before the request arrives and the server cannot find it again.
+	// Empty means the server reads the scheme and host of the request.
+	PublicURL string
 
 	// GeneratedSecret is true when MAGI_BRIDGE_SECRET was empty and the
 	// server made up BridgeSecret for this run. The caller must print
@@ -48,6 +56,7 @@ func Load(fs *flag.FlagSet, args []string) (*Config, error) {
 	secret := fs.String("bridge-secret", env("MAGI_BRIDGE_SECRET", ""), "shared secret the bridge must send in bridge.hello")
 	trustLAN := fs.Bool("trust-lan", parseBool(env("MAGI_TRUST_LAN", "true")), "allow LAN clients to connect with only an actorId")
 	trustedProxies := fs.String("trusted-proxies", env("MAGI_TRUSTED_PROXIES", ""), "comma list of proxy IPs or CIDRs allowed to set X-Forwarded-For")
+	publicURL := fs.String("public-url", env("MAGI_PUBLIC_URL", ""), "address where a player reaches the page, for example https://host/magi")
 
 	if err := fs.Parse(args); err != nil {
 		return nil, err
@@ -58,6 +67,14 @@ func Load(fs *flag.FlagSet, args []string) (*Config, error) {
 		BridgeSecret:   *secret,
 		TrustLAN:       *trustLAN,
 		TrustedProxies: *trustedProxies,
+		PublicURL:      strings.TrimRight(*publicURL, "/"),
+	}
+
+	if cfg.PublicURL != "" {
+		u, err := url.Parse(cfg.PublicURL)
+		if err != nil || u.Scheme == "" || u.Host == "" {
+			return nil, fmt.Errorf("config: MAGI_PUBLIC_URL must be an absolute address, for example https://host/magi")
+		}
 	}
 
 	if cfg.BridgeSecret == "" {

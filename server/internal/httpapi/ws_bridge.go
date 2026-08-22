@@ -55,7 +55,7 @@ func (s *Server) handleWSBridge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	baseURL := requestBaseURL(r)
+	baseURL := s.publicBaseURL(r)
 	connID := s.hub.RegisterBridge(conn, hello, baseURL)
 	defer s.hub.UnregisterBridge(connID)
 
@@ -96,6 +96,17 @@ func (s *Server) readBridgeHello(ctx context.Context, conn *websocket.Conn) (pro
 	}
 
 	return hello, true
+}
+
+// publicBaseURL gives the address where a player reaches the page. A
+// configured public URL always wins, because a proxy that serves the relay
+// under a path removes that path before the request arrives, and the
+// server cannot find it again from the request alone.
+func (s *Server) publicBaseURL(r *http.Request) string {
+	if s.cfg.PublicURL != "" {
+		return s.cfg.PublicURL
+	}
+	return requestBaseURL(r)
 }
 
 // requestBaseURL guesses the scheme and host the caller used to reach this
