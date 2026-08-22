@@ -188,7 +188,7 @@ func (h *Hub) handlePairingRequestLocked(env protocol.Envelope) {
 	code, expiresAt := h.pairing.Issue(req.ActorID)
 	issued := protocol.PairingIssued{
 		Code:      code,
-		URL:       h.bridge.baseURL + "/?code=" + code,
+		URL:       h.bridge.baseURL + "/?c=" + code,
 		ExpiresAt: expiresAt,
 	}
 	payload, _ := json.Marshal(issued)

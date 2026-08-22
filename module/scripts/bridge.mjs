@@ -60,18 +60,34 @@ export class Bridge {
     }
 
     log.info(`Connecting to ${url}`);
+    let socket;
     try {
-      this.#socket = new WebSocket(url);
+      socket = new WebSocket(url);
     } catch (err) {
       log.error("Cannot open the connection.", err);
       this.#retry();
       return;
     }
+    this.#socket = socket;
 
-    this.#socket.addEventListener("open", () => this.#onOpen());
-    this.#socket.addEventListener("message", (event) => this.#onMessage(event));
-    this.#socket.addEventListener("close", (event) => this.#onClose(event));
-    this.#socket.addEventListener("error", () => {
+    // A socket that this object replaced can still send a close event
+    // later. Each handler therefore acts only while its own socket is the
+    // current one. Without this test, the late close event of an old
+    // socket would remove the new socket and start one more connection.
+    // The server keeps only the newest bridge, so that makes a loop of
+    // connections that close each other.
+    const current = () => this.#socket === socket;
+
+    socket.addEventListener("open", () => {
+      if (current()) this.#onOpen();
+    });
+    socket.addEventListener("message", (event) => {
+      if (current()) this.#onMessage(event);
+    });
+    socket.addEventListener("close", (event) => {
+      if (current()) this.#onClose(event);
+    });
+    socket.addEventListener("error", () => {
       /* The close event follows, and it does the report. */
     });
   }

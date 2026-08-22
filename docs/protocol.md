@@ -212,7 +212,9 @@ To get a token, the device redeems a pairing code:
 2. The module sends `pairing.request`.
 3. The server makes a 6-digit code. The code is valid for 3 minutes and for one
    use.
-4. The server answers `pairing.issued`. The module shows the code and a QR image.
+4. The server answers `pairing.issued`. The `url` field ends with `?c=<code>`,
+   and the page reads that same name. The module shows the code and a QR
+   image of the URL.
 5. The device sends `POST /api/pair` with `{ "code": "123456" }`.
 6. The server answers `{ "token": "…", "actorId": "…", "expiresAt": … }`.
 
