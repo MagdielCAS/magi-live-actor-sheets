@@ -1,0 +1,21 @@
+{
+  "MAGI.Settings.ServerUrl.Name": "Server address",
+  "MAGI.Settings.ServerUrl.Hint": "The address of the relay server, for example http://127.0.0.1:30001. Use the address that the players open.",
+  "MAGI.Settings.BridgeSecret.Name": "Bridge secret",
+  "MAGI.Settings.BridgeSecret.Hint": "The same text as MAGI_BRIDGE_SECRET on the server. The server refuses the bridge if the two are different.",
+  "MAGI.Settings.Enabled.Name": "Connect to the server",
+  "MAGI.Settings.Enabled.Hint": "Turn this on to join this world to the relay server. Only the Game Master tab makes the connection.",
+
+  "MAGI.Pairing.Button": "Pair a device",
+  "MAGI.Pairing.Title": "Pair a device",
+  "MAGI.Pairing.Choose": "Choose the character for this device.",
+  "MAGI.Pairing.Create": "Make a code",
+  "MAGI.Pairing.CodeTitle": "Pairing code for {name}",
+  "MAGI.Pairing.Expires": "The code is valid for one use, for about {minutes} minutes.",
+  "MAGI.Pairing.Done": "Close",
+  "MAGI.Pairing.NoCharacters": "This world has no character to pair.",
+  "MAGI.Pairing.NotConnected": "The bridge is not connected to the server.",
+  "MAGI.Pairing.NoAnswer": "The server did not answer the pairing request.",
+
+  "MAGI.Notify.Refused": "The relay server refused the bridge. Check the bridge secret. {reason}"
+}
