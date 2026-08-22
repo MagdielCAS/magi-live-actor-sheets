@@ -9,7 +9,6 @@ export const ACTOR_PATH = {
   hpTempMax: 'system.attributes.hp.tempmax',
   deathSuccess: 'system.attributes.death.success',
   deathFailure: 'system.attributes.death.failure',
-  exhaustion: 'system.attributes.exhaustion',
   inspiration: 'system.attributes.inspiration',
   biography: 'system.details.biography.value',
   trait: 'system.details.trait',
@@ -32,9 +31,11 @@ export function resourcePath(key) {
   return `system.resources.${key}.value`;
 }
 
+// The dnd5e system calculates system.uses.value as max minus spent, so a
+// write must set system.uses.spent.
 export const ITEM_PATH = {
   quantity: 'system.quantity',
   equipped: 'system.equipped',
   prepared: 'system.preparation.prepared',
-  usesValue: 'system.uses.value',
+  usesSpent: 'system.uses.spent',
 };

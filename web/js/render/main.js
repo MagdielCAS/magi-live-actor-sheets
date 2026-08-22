@@ -4,6 +4,9 @@
 import { esc, signed, clamp, commitOnBlurOrEnter } from '../util.js';
 import { ACTOR_PATH, resourcePath } from '../paths.js';
 
+// Exhaustion is read-only. The dnd5e system calculates it from the
+// exhaustion Active Effect every time it prepares the actor, so a write to
+// system.attributes.exhaustion has no effect.
 function getExhaustion(sheet) {
   return Number(sheet.header.exhaustion ?? 0);
 }
@@ -100,10 +103,9 @@ function template(sheet) {
 
     <section class="card exhaustion-card">
       <h2 class="card-title">Exhaustion</h2>
-      <div class="stepper">
-        <button type="button" class="stepper-btn" data-action="exhaustion-dec" aria-label="Decrease exhaustion">−</button>
+      <div class="readonly-row">
         <span class="stepper-value">${getExhaustion(sheet)}</span>
-        <button type="button" class="stepper-btn" data-action="exhaustion-inc" aria-label="Increase exhaustion">+</button>
+        <span class="readonly-note">Change this in Foundry</span>
       </div>
     </section>
 
@@ -175,13 +177,6 @@ export function renderMain(container, sheet, ctx) {
     });
   }
 
-  container.querySelector('[data-action="exhaustion-dec"]').addEventListener('click', () => {
-    setExhaustion(sheet, ctx, getExhaustion(sheet) - 1);
-  });
-  container.querySelector('[data-action="exhaustion-inc"]').addEventListener('click', () => {
-    setExhaustion(sheet, ctx, getExhaustion(sheet) + 1);
-  });
-
   for (const btn of container.querySelectorAll('[data-action="resource-dec"], [data-action="resource-inc"]')) {
     btn.addEventListener('click', () => {
       const key = btn.dataset.key;
@@ -225,11 +220,6 @@ function setDeathSave(sheet, ctx, group, index) {
   ctx.patchActor({ [path]: value });
 }
 
-function setExhaustion(sheet, ctx, value) {
-  const clamped = clamp(value, 0, 6);
-  ctx.applyLocal((s) => (s.header.exhaustion = clamped));
-  ctx.patchActor({ [ACTOR_PATH.exhaustion]: clamped });
-}
 
 function setResource(sheet, ctx, key, delta) {
   const resource = sheet.resources.find((r) => r.key === key);

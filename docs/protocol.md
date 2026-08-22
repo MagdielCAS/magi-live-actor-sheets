@@ -238,7 +238,6 @@ system.attributes.hp.temp
 system.attributes.hp.tempmax
 system.attributes.death.success
 system.attributes.death.failure
-system.attributes.exhaustion
 system.attributes.inspiration
 system.spells.spell1.value … system.spells.spell9.value
 system.spells.pact.value
@@ -260,11 +259,22 @@ system.quantity
 system.equipped
 system.preparation.prepared
 system.uses.spent
-system.uses.value
 ```
 
 A path such as `ownership`, `system.attributes.ac.value`, or `flags` is not in
 the list. The server refuses it.
+
+### Fields that the system calculates
+
+Some fields look writable but are not. The dnd5e system calculates them again
+every time it prepares the actor, so a write to them has no effect. They are
+not on the list, and a page must show them as read-only.
+
+| Field | Why |
+|---|---|
+| `system.attributes.exhaustion` | `prepareExhaustionLevel()` reads the level from the exhaustion Active Effect and replaces the stored value. |
+| `system.uses.value` | `UsesField` calculates it as `max - spent`. Write `system.uses.spent` instead. |
+| `system.attributes.ac.value`, `system.skills.*.total`, `system.abilities.*.mod` | The system calculates these from the items, the effects, and the ability scores. |
 
 ## 9. Flow control
 

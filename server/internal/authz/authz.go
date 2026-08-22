@@ -8,13 +8,18 @@ import "fmt"
 // actorPaths lists the Foundry document paths a patch may set on an actor.
 var actorPaths = buildActorPaths()
 
+// Two paths look writable but are not, so they are absent on purpose. The
+// dnd5e system calculates system.attributes.exhaustion from the exhaustion
+// Active Effect, and it calculates system.uses.value as max minus spent. A
+// write to either one has no effect, so a client must send
+// system.uses.spent instead. See docs/protocol.md section 8.
+
 // itemPaths lists the Foundry document paths a patch may set on an item.
 var itemPaths = map[string]struct{}{
 	"system.quantity":             {},
 	"system.equipped":             {},
 	"system.preparation.prepared": {},
 	"system.uses.spent":           {},
-	"system.uses.value":           {},
 }
 
 func buildActorPaths() map[string]struct{} {
@@ -25,7 +30,6 @@ func buildActorPaths() map[string]struct{} {
 		"system.attributes.hp.tempmax":     {},
 		"system.attributes.death.success":  {},
 		"system.attributes.death.failure":  {},
-		"system.attributes.exhaustion":     {},
 		"system.attributes.inspiration":    {},
 		"system.spells.pact.value":         {},
 		"system.currency.pp":               {},

@@ -92,7 +92,6 @@ const ACTOR_PATHS = {
   "system.attributes.hp.tempmax": (s, v) => (s.hp.tempmax = num(v)),
   "system.attributes.death.success": (s, v) => (s.deathSaves.success = num(v)),
   "system.attributes.death.failure": (s, v) => (s.deathSaves.failure = num(v)),
-  "system.attributes.exhaustion": (s, v) => (s.header.exhaustion = num(v)),
   "system.attributes.inspiration": (s, v) => (s.header.inspiration = !!v),
   "system.details.biography.value": (s, v) => (s.notes.biography = String(v)),
   "system.details.trait": (s, v) => (s.notes.trait = String(v)),
@@ -106,9 +105,6 @@ const ITEM_PATHS = {
   "system.equipped": (it, v) => (it.equipped = !!v),
   "system.preparation.prepared": (it, v) => (it.prepared = !!v),
   "system.uses.spent": (it, v) => setSpent(it, num(v)),
-  "system.uses.value": (it, v) => {
-    if (it.uses) it.uses.value = num(v);
-  },
 };
 
 function num(v) {

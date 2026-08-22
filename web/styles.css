@@ -908,3 +908,15 @@ button {
     margin: 0 auto;
   }
 }
+
+/* A value that the page shows but cannot change. */
+.readonly-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.readonly-note {
+  color: var(--text-dim, #8b93a7);
+  font-size: 0.8rem;
+}
