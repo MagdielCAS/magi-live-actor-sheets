@@ -12,6 +12,7 @@ import { renderCombat } from './js/render/combat.js';
 import { renderSpells } from './js/render/spells.js';
 import { renderItems } from './js/render/items.js';
 import { renderNotes } from './js/render/notes.js';
+import { appUrl } from './js/base.js';
 
 const TOKEN_KEY = 'magi.token';
 
@@ -105,7 +106,7 @@ async function submitPairing(code) {
   const errorEl = document.getElementById('pairing-error');
   errorEl.textContent = '';
   try {
-    const res = await fetch('/api/pair', {
+    const res = await fetch(appUrl('api/pair'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code }),

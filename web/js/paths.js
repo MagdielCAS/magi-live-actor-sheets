@@ -22,6 +22,17 @@ export function spellSlotPath(level) {
   return `system.spells.spell${level}.value`;
 }
 
+// Pact magic has its own track. A warlock can hold a pact slot at the same
+// level as a normal slot, so the two need separate paths.
+export function pactSlotPath() {
+  return 'system.spells.pact.value';
+}
+
+// slotPath chooses the right path for one slot of the snapshot.
+export function slotPath(slot) {
+  return slot.pact ? pactSlotPath() : spellSlotPath(slot.level);
+}
+
 export function currencyPath(key) {
   return `system.currency.${key}`;
 }

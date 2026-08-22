@@ -3,6 +3,7 @@ package hub
 import (
 	"encoding/json"
 	"sort"
+	"strings"
 
 	"github.com/coder/websocket"
 
@@ -188,7 +189,7 @@ func (h *Hub) handlePairingRequestLocked(env protocol.Envelope) {
 	code, expiresAt := h.pairing.Issue(req.ActorID)
 	issued := protocol.PairingIssued{
 		Code:      code,
-		URL:       h.bridge.baseURL + "/?code=" + code,
+		URL:       pairingURL(h.bridge.baseURL, code),
 		ExpiresAt: expiresAt,
 	}
 	payload, _ := json.Marshal(issued)
@@ -245,4 +246,11 @@ func sortedKeys(set map[string]struct{}) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// pairingURL joins the public address of the page and the pairing code.
+// The base can carry a path, for example https://host/magi, so the code
+// must arrive after that path and not at the root of the domain.
+func pairingURL(baseURL, code string) string {
+	return strings.TrimRight(baseURL, "/") + "/?c=" + code
 }

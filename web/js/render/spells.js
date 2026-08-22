@@ -2,10 +2,20 @@
 // level with a prepared toggle and a Cast button.
 
 import { esc, clamp } from '../util.js';
-import { spellSlotPath, ITEM_PATH } from '../paths.js';
+import { slotPath, ITEM_PATH } from '../paths.js';
 
 function levelLabel(level) {
   return level === 0 ? 'Cantrips' : `Level ${level}`;
+}
+
+// A pact slot and a normal slot can share a level, so a level is not a
+// name. This key tells the two apart.
+function slotKey(slot) {
+  return slot.pact ? 'pact' : `spell${slot.level}`;
+}
+
+function slotLabel(slot) {
+  return slot.pact ? `Pact (level ${slot.level})` : levelLabel(slot.level);
 }
 
 function slotPips(slot) {
@@ -13,8 +23,8 @@ function slotPips(slot) {
   for (let i = 1; i <= slot.max; i += 1) {
     pips.push(
       `<button type="button" class="pip pip-slot ${i <= slot.value ? 'filled' : ''}"
-        data-action="slot" data-level="${slot.level}" data-index="${i}"
-        aria-label="Slot ${i} of level ${slot.level}"></button>`
+        data-action="slot" data-slot="${slotKey(slot)}" data-index="${i}"
+        aria-label="${slotLabel(slot)}, slot ${i}"></button>`
     );
   }
   return pips.join('');
@@ -34,7 +44,7 @@ function template(sheet) {
     .map(
       (slot) => `
       <div class="slot-row">
-        <span class="slot-label">${levelLabel(slot.level)}</span>
+        <span class="slot-label">${slotLabel(slot)}</span>
         <div class="pip-row">${slotPips(slot)}</div>
       </div>`
     )
@@ -78,9 +88,8 @@ export function renderSpells(container, sheet, ctx) {
 
   for (const pip of container.querySelectorAll('[data-action="slot"]')) {
     pip.addEventListener('click', () => {
-      const level = Number(pip.dataset.level);
       const index = Number(pip.dataset.index);
-      setSlot(sheet, ctx, level, index);
+      setSlot(sheet, ctx, pip.dataset.slot, index);
     });
   }
 
@@ -101,13 +110,13 @@ export function renderSpells(container, sheet, ctx) {
   }
 }
 
-function setSlot(sheet, ctx, level, index) {
-  const slot = sheet.spells.slots.find((s) => s.level === level);
+function setSlot(sheet, ctx, key, index) {
+  const slot = sheet.spells.slots.find((s) => slotKey(s) === key);
   if (!slot) return;
   const value = clamp(index <= slot.value ? index - 1 : index, 0, slot.max);
   ctx.applyLocal((s) => {
-    const target = s.spells.slots.find((x) => x.level === level);
+    const target = s.spells.slots.find((x) => slotKey(x) === key);
     if (target) target.value = value;
   });
-  ctx.patchActor({ [spellSlotPath(level)]: value });
+  ctx.patchActor({ [slotPath(slot)]: value });
 }

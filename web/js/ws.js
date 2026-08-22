@@ -1,6 +1,8 @@
-// The WebSocket client. It connects to /ws/client, reconnects on its own,
+// The WebSocket client. It connects to ws/client, reconnects on its own,
 // and turns outgoing messages into promises that settle on the matching
 // ack or error. See protocol.md sections 2, 4, and 7.
+
+import { appWebSocketUrl } from './base.js';
 
 const PROTOCOL_VERSION = 1;
 const MIN_BACKOFF_MS = 500;
@@ -15,11 +17,10 @@ function makeId() {
 }
 
 function wsUrl(auth) {
-  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
   const params = new URLSearchParams();
   if (auth.token) params.set('token', auth.token);
   if (auth.actorId) params.set('actorId', auth.actorId);
-  return `${proto}//${location.host}/ws/client?${params.toString()}`;
+  return appWebSocketUrl('ws/client', params);
 }
 
 export class WSClient {

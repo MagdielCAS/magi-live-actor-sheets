@@ -212,7 +212,14 @@ To get a token, the device redeems a pairing code:
 2. The module sends `pairing.request`.
 3. The server makes a 6-digit code. The code is valid for 3 minutes and for one
    use.
-4. The server answers `pairing.issued`. The module shows the code and a QR image.
+4. The server answers `pairing.issued`. The `url` field ends with `?c=<code>`,
+   and the page reads that same name. The module shows the code and a QR
+   image of the URL.
+
+   The `url` starts with `MAGI_PUBLIC_URL` when that setting has a value.
+   A proxy that serves the relay under a path removes the path before the
+   request arrives, so the server cannot find it again. Without that
+   setting the server uses the scheme and the host of the bridge request.
 5. The device sends `POST /api/pair` with `{ "code": "123456" }`.
 6. The server answers `{ "token": "…", "actorId": "…", "expiresAt": … }`.
 
