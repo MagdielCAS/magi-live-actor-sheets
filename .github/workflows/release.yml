@@ -1,0 +1,83 @@
+name: Release the module
+
+# Makes the release that Foundry installs from. Push a tag such as v0.1.0,
+# or start this workflow by hand and give the version.
+#
+# The release holds two files:
+#   module.json  the manifest, which Foundry reads to find the version
+#   module.zip   the module itself, with module.json at the root of the zip
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to release, for example 0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish the module
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read the version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            version="${{ inputs.version }}"
+          else
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          case "$version" in
+            [0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "The version must look like 1.2.3, but it is '$version'." >&2; exit 1 ;;
+          esac
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      # The manifest address always points at the newest release, so Foundry
+      # can find an update. The download address names this one release, so
+      # an older manifest never brings back a newer file.
+      - name: Put the version and the addresses in the manifest
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          jq --arg version "$VERSION" \
+             --arg manifest "https://github.com/$REPO/releases/latest/download/module.json" \
+             --arg download "https://github.com/$REPO/releases/download/$TAG/module.zip" \
+             '.version = $version | .manifest = $manifest | .download = $download' \
+             module/module.json > manifest.json
+          cat manifest.json
+
+      - name: Make the zip
+        run: |
+          cp manifest.json module/module.json
+          cd module && zip -r -q ../module.zip . -x '.*' '*/.*'
+
+      - name: Check the zip
+        run: |
+          unzip -l module.zip
+          # Foundry needs module.json at the root of the zip.
+          unzip -p module.zip module.json | jq -e '.id == "magi-live-actor-sheets"' > /dev/null
+          # The scripts must travel with it.
+          unzip -p module.zip scripts/main.mjs > /dev/null
+          echo "The zip holds the manifest and the scripts."
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release create "$TAG" \
+            module.zip \
+            manifest.json#module.json \
+            --title "$TAG" \
+            --generate-notes
