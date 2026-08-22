@@ -152,7 +152,8 @@ game system needs a new adapter, not a new web page.
 
   "header": {
     "level": 5, "classes": "Ranger 5", "race": "Elf", "background": "Outlander",
-    "ac": 16, "initiative": 3, "speed": "30 ft", "prof": 3, "inspiration": false
+    "ac": 16, "initiative": 3, "speed": "30 ft", "prof": 3,
+    "inspiration": false, "exhaustion": 0
   },
   "hp": { "value": 38, "max": 44, "temp": 0, "tempmax": 0 },
   "deathSaves": { "success": 0, "failure": 0 },
