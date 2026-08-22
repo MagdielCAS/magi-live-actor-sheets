@@ -34,6 +34,16 @@ func (s *Server) fileExists(rel string) bool {
 func setSecurityHeaders(w http.ResponseWriter) {
 	h := w.Header()
 	h.Set("X-Content-Type-Options", "nosniff")
-	h.Set("Content-Security-Policy", "default-src 'self'; base-uri 'self'; frame-ancestors 'none'")
+	// Scripts, styles, and connections stay on this origin. Images are the
+	// one exception: a portrait and an item icon come from the Foundry
+	// server, which is a different origin, and the page icon is a data URL.
+	// An image cannot run code, so this exception is safe.
+	h.Set("Content-Security-Policy",
+		"default-src 'self'; "+
+			"img-src 'self' data: http: https:; "+
+			"object-src 'none'; "+
+			"base-uri 'self'; "+
+			"form-action 'self'; "+
+			"frame-ancestors 'none'")
 	h.Set("Referrer-Policy", "no-referrer")
 }

@@ -1,7 +1,7 @@
 // The Items tab: inventory with quantity steppers, an equipped toggle, a
 // use button when the item has uses, and the currency row.
 
-import { esc, clamp } from '../util.js';
+import { esc, clamp, commitOnBlurOrEnter } from '../util.js';
 import { ITEM_PATH, currencyPath } from '../paths.js';
 
 const CURRENCY_KEYS = ['pp', 'gp', 'ep', 'sp', 'cp'];
@@ -89,16 +89,6 @@ export function renderItems(container, sheet, ctx) {
   }
 }
 
-function commitOnBlurOrEnter(input, commit) {
-  input.addEventListener('blur', () => commit(input.value));
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      commit(input.value);
-      input.blur();
-    }
-  });
-}
 
 function setQty(sheet, ctx, itemId, delta) {
   const item = sheet.inventory.find((i) => i.itemId === itemId);

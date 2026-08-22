@@ -50,12 +50,29 @@ async function loadSheet(path) {
     console.error(String(err.message ?? err));
     process.exit(1);
   }
-  const sheet = mod.default ?? mod.fixture ?? Object.values(mod).find(isSheet);
-  if (!isSheet(sheet)) {
-    console.error(`The file ${path} does not export a SheetDTO object.`);
+  // The file can export the character as an object or as a function that
+  // makes a new one. Accept both.
+  const sheet = firstSheet(Object.values(mod));
+  if (!sheet) {
+    console.error(`The file ${path} does not export a SheetDTO.`);
     process.exit(1);
   }
-  return structuredClone(sheet);
+  return sheet;
+}
+
+function firstSheet(values) {
+  for (const value of values) {
+    if (isSheet(value)) return structuredClone(value);
+    if (typeof value === "function") {
+      try {
+        const made = value();
+        if (isSheet(made)) return made;
+      } catch {
+        /* Not a factory for a character. Try the next export. */
+      }
+    }
+  }
+  return null;
 }
 
 function isSheet(v) {
@@ -224,7 +241,18 @@ function connect() {
   console.log(`Connecting to ${opts.url}/ws/bridge …`);
   socket = new WebSocket(`${opts.url.replace(/\/$/, "")}/ws/bridge`);
 
+  // A connection that never opens and never closes would stop the script
+  // for ever. The watchdog closes it, and the close event starts the next
+  // try.
+  const watchdog = setTimeout(() => {
+    if (socket?.readyState !== WebSocket.OPEN) {
+      console.log("The connection did not open in time. Trying again.");
+      socket?.close();
+    }
+  }, 10000);
+
   socket.addEventListener("open", () => {
+    clearTimeout(watchdog);
     backoff = 1000;
     send("bridge.hello", {
       secret: opts.secret,
@@ -256,6 +284,7 @@ function connect() {
   });
 
   socket.addEventListener("close", (event) => {
+    clearTimeout(watchdog);
     console.log(`The connection closed. Code ${event.code}. ${event.reason ?? ""}`);
     if (event.code === 1008) {
       console.error("The server refused the secret. Check --secret.");

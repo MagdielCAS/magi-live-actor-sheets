@@ -1,7 +1,7 @@
 // The Main tab: identity, HP, core stats, death saves, exhaustion,
 // resources, and the chat composer.
 
-import { esc, signed, clamp } from '../util.js';
+import { esc, signed, clamp, commitOnBlurOrEnter } from '../util.js';
 import { ACTOR_PATH, resourcePath } from '../paths.js';
 
 function getExhaustion(sheet) {
@@ -196,16 +196,6 @@ export function renderMain(container, sheet, ctx) {
   });
 }
 
-function commitOnBlurOrEnter(input, commit) {
-  input.addEventListener('blur', () => commit(input.value));
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      commit(input.value);
-      input.blur();
-    }
-  });
-}
 
 function applyDamage(sheet, ctx, amount) {
   const fromTemp = Math.min(sheet.hp.temp, amount);
