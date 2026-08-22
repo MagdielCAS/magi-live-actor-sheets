@@ -16,12 +16,18 @@ func (s *Server) handleWSClient(w http.ResponseWriter, r *http.Request) {
 	// The client is always a browser page, so it always sends an Origin
 	// header, and that header must match this server.
 	if !sameOrigin(r) {
+		// Say so in the log. A browser turns this into close code 1006
+		// with no reason, so the log is the only place to see why.
+		s.log.Warn("client refused: the origin does not match this server",
+			"origin", r.Header.Get("Origin"), "host", r.Host)
 		http.Error(w, "origin not allowed", http.StatusForbidden)
 		return
 	}
 
 	actorID, ok := s.admitClient(r)
 	if !ok {
+		s.log.Warn("client refused: no valid token, and the peer is not on the local network",
+			"remote", r.RemoteAddr)
 		http.Error(w, "not authorized", http.StatusUnauthorized)
 		return
 	}

@@ -29,14 +29,17 @@ const clientReadLimit = 256 << 10 // 256 KiB
 // first message must be bridge.hello with the right secret; anything else
 // closes the connection.
 func (s *Server) handleWSBridge(w http.ResponseWriter, r *http.Request) {
-	// A missing Origin header is expected here: the dev bridge (running
-	// inside Foundry, not a browser tab reachable from the internet) may
-	// not send one. A present Origin header still has to match, in case a
-	// browser-based bridge is ever added.
-	if origin := r.Header.Get("Origin"); origin != "" && !sameOrigin(r) {
-		http.Error(w, "origin not allowed", http.StatusForbidden)
-		return
-	}
+	// There is no same-origin test here, and there must not be one.
+	//
+	// The bridge is the Game Master tab of Foundry. That page comes from
+	// the Foundry address, and it opens this socket on the relay address,
+	// so the two are different by nature. An earlier same-origin test
+	// refused every real bridge with 403 during the handshake, which a
+	// browser reports only as close code 1006.
+	//
+	// The shared secret guards this endpoint. A page that has no secret
+	// gets nothing: the first message must be bridge.hello with the right
+	// secret, and the server compares it in constant time.
 
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{InsecureSkipVerify: true})
 	if err != nil {

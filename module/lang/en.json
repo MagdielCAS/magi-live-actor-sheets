@@ -5,7 +5,6 @@
   "MAGI.Settings.BridgeSecret.Hint": "The same text as MAGI_BRIDGE_SECRET on the server. The server refuses the bridge if the two are different.",
   "MAGI.Settings.Enabled.Name": "Connect to the server",
   "MAGI.Settings.Enabled.Hint": "Turn this on to join this world to the relay server. Only the Game Master tab makes the connection.",
-
   "MAGI.Pairing.Button": "Pair a device",
   "MAGI.Pairing.Title": "Pair a device",
   "MAGI.Pairing.Choose": "Choose the character for this device.",
@@ -16,6 +15,8 @@
   "MAGI.Pairing.NoCharacters": "This world has no character to pair.",
   "MAGI.Pairing.NotConnected": "The bridge is not connected to the server.",
   "MAGI.Pairing.NoAnswer": "The server did not answer the pairing request.",
-
-  "MAGI.Notify.Refused": "The relay server refused the bridge. Check the bridge secret. {reason}"
+  "MAGI.Notify.Refused": "The relay server refused the bridge. Check the bridge secret. {reason}",
+  "MAGI.Pairing.MenuName": "Pair a device",
+  "MAGI.Pairing.MenuHint": "Open the dialog that makes a pairing code for one character.",
+  "MAGI.Pairing.NotReady": "The module is not ready. Open a world with a supported game system."
 }

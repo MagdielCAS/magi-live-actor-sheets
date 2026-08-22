@@ -42,15 +42,32 @@ export class Pairing {
   #addDirectoryButton(root) {
     if (!root || root.querySelector(".magi-pair-button")) return;
 
-    const header = root.querySelector(".directory-header, .header-actions, header");
-    if (!header) return;
+    // The sidebar changes shape between Foundry versions, so try the
+    // places a button can live, from the best to the last resort. The
+    // menu in Configure Settings works whatever happens here.
+    const target =
+      root.querySelector(".header-actions") ??
+      root.querySelector(".directory-header .action-buttons") ??
+      root.querySelector(".action-buttons") ??
+      root.querySelector(".directory-header") ??
+      root.querySelector("header") ??
+      root.firstElementChild;
+
+    if (!target) {
+      log.warn(
+        "Cannot find a place for the pairing button in the Actors list. " +
+          "Use Configure Settings, or game.modules.get('magi-live-actor-sheets').api.pair()."
+      );
+      return;
+    }
 
     const button = document.createElement("button");
     button.type = "button";
     button.className = "magi-pair-button";
     button.innerHTML = `<i class="fa-solid fa-mobile-screen"></i> ${game.i18n.localize("MAGI.Pairing.Button")}`;
     button.addEventListener("click", () => this.open());
-    header.append(button);
+    target.append(button);
+    log.debug(`Pairing button added to ${target.className || target.tagName}.`);
   }
 
   // requestCode asks the server for a code and waits for the answer.

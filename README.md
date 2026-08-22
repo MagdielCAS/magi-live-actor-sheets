@@ -103,6 +103,10 @@ Open **Game Settings → Configure Settings → Magi Live Actor Sheets**.
 
 Only a Game Master can see and change these settings.
 
+The same window has a **Pair a device** button. The Actors list has one too,
+but the settings window is the one that always works, because the shape of the
+sidebar changes between Foundry versions.
+
 ### 4. Open the sheet on a phone
 
 **On the same network**, open the server address in the phone browser and add
