@@ -50,25 +50,28 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
           REPO: ${{ github.repository }}
         run: |
+          mkdir -p dist
           jq --arg version "$VERSION" \
              --arg manifest "https://github.com/$REPO/releases/latest/download/module.json" \
              --arg download "https://github.com/$REPO/releases/download/$TAG/module.zip" \
              '.version = $version | .manifest = $manifest | .download = $download' \
-             module/module.json > manifest.json
-          cat manifest.json
+             module/module.json > dist/module.json
+          cat dist/module.json
 
       - name: Make the zip
         run: |
-          cp manifest.json module/module.json
-          cd module && zip -r -q ../module.zip . -x '.*' '*/.*'
+          cp dist/module.json module/module.json
+          cd module && zip -r -q ../dist/module.zip . -x '.*' '*/.*'
 
       - name: Check the zip
         run: |
-          unzip -l module.zip
+          unzip -l dist/module.zip
           # Foundry needs module.json at the root of the zip.
-          unzip -p module.zip module.json | jq -e '.id == "magi-live-actor-sheets"' > /dev/null
+          unzip -p dist/module.zip module.json | jq -e '.id == "magi-live-actor-sheets"' > /dev/null
           # The scripts must travel with it.
-          unzip -p module.zip scripts/main.mjs > /dev/null
+          unzip -p dist/module.zip scripts/main.mjs > /dev/null
+          # Foundry asks for the file by name, so the name must be exact.
+          test -f dist/module.json
           echo "The zip holds the manifest and the scripts."
 
       - name: Publish the release
@@ -76,8 +79,29 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
         run: |
+          # Upload the files by their real names. A name after a # would
+          # be only a label, and Foundry asks for the name.
           gh release create "$TAG" \
-            module.zip \
-            manifest.json#module.json \
+            dist/module.json \
+            dist/module.zip \
             --title "$TAG" \
             --generate-notes
+
+      # The address in the manifest is the one Foundry uses, so prove that
+      # it answers before calling the release good.
+      - name: Check the published address
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          url="https://github.com/$REPO/releases/latest/download/module.json"
+          for attempt in 1 2 3 4 5; do
+            if curl -fsSL "$url" -o published.json; then
+              jq -e '.id == "magi-live-actor-sheets"' published.json > /dev/null
+              echo "$url answers, and it holds version $(jq -r .version published.json)."
+              exit 0
+            fi
+            echo "Attempt $attempt: the address does not answer yet. Waiting."
+            sleep 5
+          done
+          echo "The manifest address never answered. Foundry could not install this." >&2
+          exit 1
