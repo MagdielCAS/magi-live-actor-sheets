@@ -1,0 +1,9 @@
+# The image needs only server/ and web/.
+*
+!server
+!web
+
+# Nothing from these belongs in the image.
+**/*_test.go
+**/.DS_Store
+server/magi-server

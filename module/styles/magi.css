@@ -1,0 +1,36 @@
+/* The pairing dialog. The rest of the module has no interface. */
+
+.magi-pairing-select {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.magi-pairing-code {
+  text-align: center;
+}
+
+.magi-qr svg {
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+}
+
+.magi-code {
+  font-family: monospace;
+  font-size: 2rem;
+  letter-spacing: 0.35rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.magi-url,
+.magi-hint {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin: 0.15rem 0;
+  word-break: break-all;
+}
+
+.magi-pair-button {
+  width: 100%;
+  margin-top: 0.25rem;
+}

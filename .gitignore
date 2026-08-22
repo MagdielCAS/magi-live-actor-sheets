@@ -1,0 +1,12 @@
+# Go
+/server/magi-server
+/dist/
+
+# Node (dev tooling only)
+node_modules/
+
+# Editors / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#12141a">
+<meta name="color-scheme" content="dark">
+<title>Magi Live Sheet</title>
+<!-- The icon is inline, because the page must not request an external file. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312141a'/%3E%3Cpath d='M8 23V9l8 9 8-9v14' fill='none' stroke='%237aa2ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312141a'/%3E%3Cpath d='M8 23V9l8 9 8-9v14' fill='none' stroke='%237aa2ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="badge" class="badge" data-state="offline" aria-live="polite">Offline</div>
+
+<main id="app">
+
+  <section id="pairing" class="pairing">
+    <div class="pairing-box">
+      <h1 class="pairing-title">Magi Live Sheet</h1>
+      <p class="pairing-hint">Enter the 6-digit code from your GM's screen.</p>
+      <form id="pairing-form" autocomplete="off">
+        <input
+          id="pairing-code"
+          class="pairing-code-input"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="6"
+          placeholder="000000"
+          aria-label="Pairing code"
+          required>
+        <button type="submit" class="btn btn-big btn-primary">Pair</button>
+      </form>
+      <p id="pairing-error" class="pairing-error" role="alert"></p>
+    </div>
+  </section>
+
+  <section id="sheet" class="sheet hidden">
+    <div id="tab-panels" class="tab-panels">
+      <section id="tab-main" class="tab-panel" data-tab="main"></section>
+      <section id="tab-skills" class="tab-panel" data-tab="skills" hidden></section>
+      <section id="tab-combat" class="tab-panel" data-tab="combat" hidden></section>
+      <section id="tab-spells" class="tab-panel" data-tab="spells" hidden></section>
+      <section id="tab-items" class="tab-panel" data-tab="items" hidden></section>
+      <section id="tab-notes" class="tab-panel" data-tab="notes" hidden></section>
+    </div>
+  </section>
+
+</main>
+
+<div id="toast" class="toast" aria-live="polite"></div>
+
+<nav id="tabbar" class="tabbar hidden" aria-label="Sheet tabs">
+  <button type="button" class="tab-btn active" data-tab="main">Main</button>
+  <button type="button" class="tab-btn" data-tab="skills">Skills</button>
+  <button type="button" class="tab-btn" data-tab="combat">Combat</button>
+  <button type="button" class="tab-btn" data-tab="spells">Spells</button>
+  <button type="button" class="tab-btn" data-tab="items">Items</button>
+  <button type="button" class="tab-btn" data-tab="notes">Notes</button>
+</nav>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
