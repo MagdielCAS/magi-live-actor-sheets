@@ -154,9 +154,13 @@ actor id. There is no password. Set `MAGI_TRUST_LAN=false` to stop this.
 
 **On the web.** Put the relay behind the same domain or a sub-domain as your
 Foundry server, with your reverse proxy. The server sends no CORS headers, and
-it compares the WebSocket `Origin` header with the request `Host`. A page on
-another domain therefore cannot use the server. A phone that is not on your
-network must pair with a code.
+for the sheet page it compares the WebSocket `Origin` header with the request
+`Host`. A page on another domain therefore cannot use the server. A phone that
+is not on your network must pair with a code.
+
+The bridge is different. It is the Game Master tab of Foundry, which comes from
+the Foundry address and opens its socket on the relay address, so the two
+always differ. The bridge secret guards that connection instead.
 
 **Writes are limited.** The module writes with Game Master permission.
 Therefore the server and the module both compare each write with a list of
