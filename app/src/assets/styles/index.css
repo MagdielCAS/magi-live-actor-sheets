@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@import './tokens.css';
+
+/* The page is dark and fills the screen of a phone, below the notch and
+   above the home bar. index.html carries viewport-fit=cover, which is what
+   makes the env() values real. */
+@layer base {
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* A tap must not select text on a control. */
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
