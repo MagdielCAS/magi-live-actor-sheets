@@ -178,7 +178,10 @@ game system needs a new adapter, not a new web page.
       "weight": 10, "equipped": false, "uses": null }
   ],
   "spells": {
-    "slots": [ { "level": 1, "value": 3, "max": 4 } ],
+    "slots": [
+      { "level": 1, "value": 3, "max": 4 },
+      { "level": 3, "value": 2, "max": 2, "pact": true }
+    ],
     "list": [
       { "itemId": "i3", "name": "Hunter's Mark", "level": 1, "school": "div",
         "prepared": true, "uses": null }
@@ -194,6 +197,14 @@ A `uses` value is `null` or `{ "value": 1, "max": 3 }`.
 
 `rev` is a counter. The module increases it for each snapshot of that actor. The
 server discards a snapshot with a `rev` that is not larger than the last one.
+
+A spell slot carries `"pact": true` when it belongs to the pact magic track.
+The field is absent for a normal slot. **Pact magic has its own track, and a
+warlock can hold a pact slot at the same level as a normal slot**, so a level is
+not a name. A page must identify a slot by the pair of level and track, and it
+must write through `system.spells.pact.value` for a pact slot and
+`system.spells.spell<level>.value` for a normal one. A slot found by its level
+alone spends the wrong track.
 
 ## 7. Authorization
 

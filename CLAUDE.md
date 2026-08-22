@@ -12,12 +12,18 @@ directions. Three parts, in three directories:
 |---|---|---|
 | Foundry module | `module/` | Plain ESM. Runs in the **Game Master browser tab**. The only part that talks to Foundry. |
 | Relay server | `server/` | One Go binary. Moves messages, serves the page. No database. |
-| Web page | `web/` | Plain HTML, CSS, ES modules. **No build step, no framework, no dependency.** |
+| Web page (old) | `web/` | Plain HTML, CSS, ES modules. No build step. **This is still the page the image ships.** |
+| Web page (new) | `app/` | Vue 3, Vite, TypeScript, Pinia, Tailwind, shadcn-vue. A working frame, not yet equal to `web/`. |
 
 ```
 Foundry v14 (GM tab)  ──WS──▶  Go relay :30001  ◀──WS──▶  phone
-   module/                        server/                  web/
+   module/                        server/               web/ → app/
 ```
+
+**Two pages exist at the same time, on purpose.** `app/` is the replacement and
+it is built with Vite; `web/` is what a player still gets. The one line that
+moves the image from one to the other is marked in the `Dockerfile`. Do not
+make that change until `app/` draws everything `web/` draws.
 
 Targets **Foundry v14** and **dnd5e 5.x**. Foundry holds the true data; the
 server keeps only an in-memory snapshot cache.
@@ -74,6 +80,71 @@ gains or loses a field silently.
 A warlock can hold a pact slot at the same level as a normal slot. The page
 keeps each slot's kind and routes through `slotPath()` in `web/js/paths.js`.
 Never look a slot up by level alone.
+
+### The new page uses a hash route, and must keep using one
+
+`app/` sets `base: './'` and `createWebHashHistory`. The two go together and
+neither works alone.
+
+The relay answers **any** path it does not know with `index.html`, at status 200
+with `Content-Type: text/html`, and it sends `nosniff`. So with a path route,
+a browser at `/magi/sheet/abc/spells` asks for `./assets/index-<hash>.js`,
+which resolves to `/magi/sheet/abc/assets/…`, which the relay answers with the
+page. The browser then refuses the module because the type is wrong, and the
+screen is blank with **no JavaScript running to explain it**.
+
+Finding the root at run time does not save this: the browser resolves the
+`<script src>` of `index.html` before one byte of the page runs. It is circular.
+
+A hash keeps the path of the document at the root of the application, so every
+relative address stays correct. Nothing is lost, because every entry point of
+this product is already the root plus a query: `?c=`, `?actorId=`, `?fixture=1`.
+
+Two details that were both real faults:
+
+- **`createWebHashHistory()` must be given a base.** Its default is
+  `location.pathname + location.search`, so a person who arrives at
+  `/magi/?c=123456` keeps the pairing code in every address after it, long
+  after the code is used. `appPathname()` in `app/src/core/transport/base.ts`
+  is the value to pass.
+- **Every JS chunk must stay flat in `assets/`.** `base.ts` finds the root with
+  `new URL('../', import.meta.url)`. A nested chunk makes the root wrong, and
+  every address in the page with it. `npm run check-dist` tests this.
+
+### A missing asset must be a 404, not the page
+
+`serveWeb` now answers a request under `assets/` that names no real file with a
+plain **404**. This is not tidiness. A browser that kept an old `index.html`
+asks for a file that a new release removed; the fallback would answer with HTML,
+`nosniff` would make the browser refuse it, and the person would get a blank
+screen that only a hard reload clears. A 404 is the honest answer and it is
+visible in the network panel.
+
+The cache headers exist for the same reason. A file under `assets/` carries a
+hash of its content in its name and gets a year with `immutable`; `index.html`
+and the fallback get `no-cache`, because the page names the current asset files.
+Caching `index.html` is what creates the failure above.
+
+### The write loop came back a different way
+
+The old page produced 600+ writes from one tap: a snapshot redrew the tab with
+`innerHTML`, which destroyed the focused input, which fired `blur`, which wrote
+the same value, which made a new snapshot.
+
+Vue patches in place, so with a stable key the input survives and the first
+trigger is gone. **The focus and caret restoration in `web/app.js` is therefore
+dead code and was not carried over.** But the loop returns through a `v-for`
+without `:key`, a `v-model` bound straight at the store, or an unconditional
+`@blur`. `app/src/composables/useServerBackedField.ts` closes all three, and
+every input of the sheet goes through it. Two rules there:
+
+- A commit compares against the **live server value**, not the value the input
+  was drawn with. That is stronger than the old check: it holds no matter who
+  fired the blur, the unmount included.
+- **Never commit from `onBeforeUnmount`.** That was the exact trigger.
+
+Proved end to end against the fake bridge: 8 snapshots arriving while a person
+typed produced 4 writes, one for each deliberate commit.
 
 ### The page must not use absolute paths
 
@@ -158,7 +229,19 @@ Chromium for browser checks is at `/opt/pw-browsers/chromium`; Playwright is at
 ```bash
 cd server && gofmt -l . && go vet ./... && go test ./... && cd ..
 find module/scripts web scripts -name '*.mjs' -o -name '*.js' | xargs -n1 node --check
+cd app && npm run typecheck && npm test -- --run && npm run build && npm run check-dist && cd ..
 ```
+
+`npm run check-dist` tests three rules that no build error catches, and each one
+shows up in production only as a blank page with no reason: an inline script or
+style, which the relay policy refuses; an address that is not relative, which
+breaks the page under a path such as `https://host/magi/`; and a JS chunk that
+is not flat under `assets/`, which breaks the way the page finds its own root.
+
+`app/scripts/smoke.mjs` drives the built page in Chromium against the **real Go
+binary**, and fails on any policy violation. It is the only place the production
+Content-Security-Policy is ever exercised, because the Vite development server
+sends no policy at all.
 
 Tests exist only where they protect something: the write allowlist, pairing
 expiry and one-time use, origin and LAN admission, and the pairing URL. **Do
