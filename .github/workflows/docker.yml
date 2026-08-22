@@ -1,12 +1,21 @@
 name: Build the container image
 
+# This workflow checks the server and builds the image. It runs on its own for
+# a pull request, where it only proves that the build still works, and the
+# release workflow calls it on a push to main, where it also gives the image
+# the numbers of the version being released.
+
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
   pull_request:
     branches: [main]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      version:
+        description: "The version being released, for example 1.2.3. Empty means no version tags."
+        required: false
+        type: string
+        default: ""
 
 env:
   REGISTRY: ghcr.io
@@ -64,6 +73,40 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 1.2.3 also gives the image the tags 1.2 and 1, so a deployment can
+      # follow a line of releases as narrowly or as loosely as it wants.
+      - name: Work out the version tags
+        id: version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VERSION:-}" ]; then
+            # The tags below are turned off in this case. They still need a
+            # value, because an empty one is not a tag name.
+            {
+              echo "released=false"
+              echo "version=none"
+              echo "minor=none"
+              echo "major=none"
+            } >> "$GITHUB_OUTPUT"
+            echo "This build is not a release, so the image gets no version tags."
+            exit 0
+          fi
+          case "$VERSION" in
+            [0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "The version must look like 1.2.3, but it is '$VERSION'." >&2; exit 1 ;;
+          esac
+          major="${VERSION%%.*}"
+          rest="${VERSION#*.}"
+          minor="${rest%%.*}"
+          {
+            echo "released=true"
+            echo "version=$VERSION"
+            echo "minor=$major.$minor"
+            echo "major=$major"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Choose the tags
         id: meta
         uses: docker/metadata-action@v6
@@ -72,10 +115,10 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.version.outputs.version }},enable=${{ steps.version.outputs.released == 'true' }}
+            type=raw,value=${{ steps.version.outputs.minor }},enable=${{ steps.version.outputs.released == 'true' }}
+            type=raw,value=${{ steps.version.outputs.major }},enable=${{ steps.version.outputs.released == 'true' }}
+            type=raw,value=latest,enable=${{ steps.version.outputs.released == 'true' }}
             type=sha,format=short
 
       - name: Build and push
