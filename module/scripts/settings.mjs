@@ -44,7 +44,40 @@ export function registerSettings(onChange) {
     onChange,
   });
 
+  registerPairingMenu();
+
   log.debug("Settings registered.");
+}
+
+// A button in Configure Settings that opens the pairing dialog.
+//
+// The button in the Actors list depends on the shape of the sidebar, and
+// that shape changes between Foundry versions. This entry point uses only
+// the settings API, which does not change, so there is always a way to
+// reach the dialog.
+function registerPairingMenu() {
+  const Base = foundry.applications?.api?.ApplicationV2 ?? FormApplication;
+
+  class PairingMenu extends Base {
+    // Foundry makes this object and calls render. The work belongs to the
+    // dialog, so this object only opens it. The module API is read late,
+    // because settings are registered before the module is ready.
+    render() {
+      const api = game.modules.get(MODULE_ID)?.api;
+      if (api?.pair) api.pair();
+      else ui.notifications?.error(game.i18n.localize("MAGI.Pairing.NotReady"));
+      return this;
+    }
+  }
+
+  game.settings.registerMenu(MODULE_ID, "pair", {
+    name: "MAGI.Pairing.MenuName",
+    hint: "MAGI.Pairing.MenuHint",
+    label: "MAGI.Pairing.Button",
+    icon: "fa-solid fa-mobile-screen",
+    type: PairingMenu,
+    restricted: true,
+  });
 }
 
 export function getSetting(key) {
