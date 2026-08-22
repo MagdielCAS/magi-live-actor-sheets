@@ -2,8 +2,17 @@
 /server/magi-server
 /dist/
 
-# Node (dev tooling only)
+# Node
+# /dist/ above is anchored at the root, so it does not cover the build of
+# the web app.
 node_modules/
+/app/dist/
+/app/*.tsbuildinfo
+
+# unplugin-auto-import and unplugin-vue-components write these at build
+# time. They are generated, not written by a person.
+/app/src/auto-imports.d.ts
+/app/src/components.d.ts
 
 # Editors / OS
 .DS_Store

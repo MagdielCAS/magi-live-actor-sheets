@@ -1,9 +1,9 @@
 name: Build the container image
 
-# This workflow checks the server and builds the image. It runs on its own for
-# a pull request, where it only proves that the build still works, and the
-# release workflow calls it on a push to main, where it also gives the image
-# the numbers of the version being released.
+# This workflow checks the server and the web app, then builds the image. It
+# runs on its own for a pull request, where it only proves that the build still
+# works, and the release workflow calls it on a push to main, where it also
+# gives the image the numbers of the version being released.
 
 on:
   pull_request:
@@ -51,9 +51,46 @@ jobs:
         working-directory: server
         run: go test ./...
 
+  web:
+    name: Check the web app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: app/.nvmrc
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Check the types
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test -- --run
+
+      - name: Build
+        run: npm run build
+
+      # Three rules that no build error can catch. Each one shows up in
+      # production as a page that is blank with no reason given.
+      #   - an inline script or style, which the relay policy refuses;
+      #   - an address that is not relative, which breaks the page under a
+      #     path such as https://host/magi/;
+      #   - a JS chunk that is not flat under assets/, which breaks the way
+      #     the page finds its own root.
+      - name: Check the build output
+        run: npm run check-dist
+
   image:
     name: Build and push the image
-    needs: check
+    needs: [check, web]
     runs-on: ubuntu-latest
     permissions:
       contents: read

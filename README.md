@@ -29,7 +29,10 @@ There are three parts.
    from a phone. It is the only part that speaks to Foundry.
 2. **The relay server** is one Go binary. It moves messages between the module
    and the phones. It also sends the web page. It keeps no database.
-3. **The web page** is plain HTML, CSS, and JavaScript. There is no build step.
+3. **The web page** is the part a player opens on a phone. The page in `web/`
+   is plain HTML, CSS, and JavaScript with no build step, and it is the one the
+   container sends today. A replacement in `app/` is being written with Vue and
+   Vite; it is not equal to the old page yet, so it is not shipped.
 
 Foundry holds the true data. The server keeps only a copy in memory.
 
@@ -347,6 +350,26 @@ changes the hit points every 20 seconds, so you can see that Foundry can push
 data to the page.
 
 To see only the page, with no server, open `web/index.html?fixture=1`.
+
+### The new page
+
+The replacement page in `app/` is built with Vite, so it needs one build step.
+Node 22 or later is necessary.
+
+```bash
+cd app && npm ci
+
+# Serve the built page from the relay, next to the test bridge above.
+npm run build
+cd .. && MAGI_BRIDGE_SECRET=dev-secret ./server/magi-server -web ./app/dist
+
+# Or work on the page with hot reload. Vite sends the page and passes
+# /ws and /api through to the relay, which must already be running.
+cd app && npm run dev
+```
+
+`http://127.0.0.1:30001/?fixture=1` draws the example character with no socket
+at all, which is the fastest way to work on layout.
 
 Checks:
 

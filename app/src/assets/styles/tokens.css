@@ -1,0 +1,69 @@
+/* The colours of the page.
+ *
+ * These are the tokens from web/styles.css, moved into the Tailwind v4
+ * theme. The names on the left are the ones shadcn-vue components expect,
+ * so a component from the registry works with no change. The names in the
+ * comments are the ones the old stylesheet used, to make the move easy to
+ * follow.
+ *
+ * The theme is dark. A light theme is a swap of these values later. */
+
+@theme {
+  /* --bg */
+  --color-background: #12141a;
+  /* --text */
+  --color-foreground: #eef0f6;
+
+  /* --bg-card */
+  --color-card: #1f2330;
+  --color-card-foreground: #eef0f6;
+
+  /* --bg-elevated */
+  --color-popover: #1a1d26;
+  --color-popover-foreground: #eef0f6;
+
+  /* --accent */
+  --color-primary: #7c9eff;
+  --color-primary-foreground: #12141a;
+
+  /* --bg-card-alt */
+  --color-secondary: #262b3b;
+  --color-secondary-foreground: #eef0f6;
+
+  --color-muted: #262b3b;
+  /* --text-dim */
+  --color-muted-foreground: #9aa0b4;
+
+  /* --accent-dim */
+  --color-accent: #4a5b8f;
+  --color-accent-foreground: #eef0f6;
+
+  /* --danger */
+  --color-destructive: #f0616f;
+  --color-destructive-foreground: #12141a;
+
+  /* --success and --warning have no shadcn name. They keep their own. */
+  --color-success: #3ecf8e;
+  --color-warning: #f3b358;
+  /* --text-faint */
+  --color-faint: #6b7185;
+
+  /* --border */
+  --color-border: #2e3342;
+  --color-input: #2e3342;
+  --color-ring: #7c9eff;
+
+  --radius: 0.625rem;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+}
+
+:root {
+  color-scheme: dark;
+
+  /* The height of the bar at the bottom of a phone screen. The main
+     region pads itself by this much, so the last row is reachable. */
+  --tabbar-height: 4rem;
+}
