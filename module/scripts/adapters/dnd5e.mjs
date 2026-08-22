@@ -120,11 +120,10 @@ function buildSpellSlots(actor) {
   return slots;
 }
 
+// The system data model has this getter. It reports whether any activity of
+// the item makes an attack roll.
 function isAttack(item) {
-  return Boolean(
-    item.system?.activities?.contents?.some?.((a) => a.type === "attack") ??
-      item.hasAttack
-  );
+  return Boolean(item.system?.hasAttack);
 }
 
 function buildItems(actor) {
@@ -211,7 +210,7 @@ export function buildSheet(actor) {
       speed: speedValue ? `${speedValue} ${speedUnits}`.trim() : "",
       prof: Number(attributes.prof ?? 0),
       inspiration: Boolean(attributes.inspiration),
-      // Read-only. The system calculates it from the exhaustion effect.
+      // Read-only. The system calculates it from the exhaustion condition.
       exhaustion: Number(attributes.exhaustion ?? 0),
     },
 
@@ -318,20 +317,30 @@ export async function roll(actor, payload) {
 }
 
 // In dnd5e 5.x an attack and its damage belong to an activity of the item.
+//
+// Only an attack activity has rollAttack. Several kinds of activity have
+// rollDamage: an attack, a save, and a heal all make damage or healing. So
+// an attack looks for the attack activity, and damage takes the first
+// activity that can roll it.
+//
 // If the item has no such activity, the item card is the correct answer,
 // because the card carries the buttons for the attack and the damage.
 async function rollActivity(actor, itemId, what, config) {
   const item = actor.items.get(itemId);
   if (!item) throw new Error(`There is no item with the id ${itemId}`);
 
-  const activity = item.system?.activities?.contents?.find?.((a) => a.type === "attack");
+  const activities = item.system?.activities;
 
-  if (what === "attack" && typeof activity?.rollAttack === "function") {
-    return activity.rollAttack(config, NO_DIALOG, {});
+  if (what === "attack") {
+    const attack = activities?.getByType?.("attack")?.[0];
+    if (typeof attack?.rollAttack === "function") {
+      return attack.rollAttack(config, NO_DIALOG, {});
+    }
+  } else {
+    const source = activities?.find?.((a) => typeof a.rollDamage === "function");
+    if (source) return source.rollDamage(config, NO_DIALOG, {});
   }
-  if (what === "damage" && typeof activity?.rollDamage === "function") {
-    return activity.rollDamage(config, NO_DIALOG, {});
-  }
+
   return item.use({}, NO_DIALOG, {});
 }
 

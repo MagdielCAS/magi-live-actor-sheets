@@ -272,7 +272,7 @@ not on the list, and a page must show them as read-only.
 
 | Field | Why |
 |---|---|
-| `system.attributes.exhaustion` | `prepareExhaustionLevel()` reads the level from the exhaustion Active Effect and replaces the stored value. |
+| `system.attributes.exhaustion` | `prepareExhaustionLevel()` reads the level from the exhaustion condition and replaces the stored value. |
 | `system.uses.value` | `UsesField` calculates it as `max - spent`. Write `system.uses.spent` instead. |
 | `system.attributes.ac.value`, `system.skills.*.total`, `system.abilities.*.mod` | The system calculates these from the items, the effects, and the ability scores. |
 

@@ -10,7 +10,7 @@ var actorPaths = buildActorPaths()
 
 // Two paths look writable but are not, so they are absent on purpose. The
 // dnd5e system calculates system.attributes.exhaustion from the exhaustion
-// Active Effect, and it calculates system.uses.value as max minus spent. A
+// condition, and it calculates system.uses.value as max minus spent. A
 // write to either one has no effect, so a client must send
 // system.uses.spent instead. See docs/protocol.md section 8.
 

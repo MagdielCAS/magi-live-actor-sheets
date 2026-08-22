@@ -5,9 +5,9 @@
 // fault in the server would let a phone change any part of the world.
 //
 // Two paths that look writable are absent on purpose. The dnd5e system
-// calculates system.attributes.exhaustion from the exhaustion Active
-// Effect, and it calculates system.uses.value as max minus spent. A write
-// to either one has no effect.
+// calculates system.attributes.exhaustion from the exhaustion condition,
+// and it calculates system.uses.value as max minus spent. A write to
+// either one has no effect.
 
 const ACTOR_PATHS = new Set([
   "system.attributes.hp.value",

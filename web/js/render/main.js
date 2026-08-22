@@ -5,7 +5,7 @@ import { esc, signed, clamp, commitOnBlurOrEnter } from '../util.js';
 import { ACTOR_PATH, resourcePath } from '../paths.js';
 
 // Exhaustion is read-only. The dnd5e system calculates it from the
-// exhaustion Active Effect every time it prepares the actor, so a write to
+// exhaustion condition every time it prepares the actor, so a write to
 // system.attributes.exhaustion has no effect.
 function getExhaustion(sheet) {
   return Number(sheet.header.exhaustion ?? 0);
