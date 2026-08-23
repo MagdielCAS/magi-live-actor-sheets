@@ -1,7 +1,7 @@
 // The Notes tab: the sanitized biography, and the trait, ideal, bond, and
 // flaw fields as editable text areas.
 
-import { esc, debounce } from '../util.js';
+import { esc, debounce, cardTitle } from '../util.js';
 import { sanitizeHtml } from '../sanitize.js';
 import { ACTOR_PATH } from '../paths.js';
 
@@ -16,14 +16,14 @@ function template(sheet) {
   const fieldRows = FIELDS.map(
     (f) => `
       <section class="card">
-        <h2 class="card-title">${f.label}</h2>
+        ${cardTitle(f.label)}
         <textarea class="note-textarea" data-field="${f.key}" rows="3">${esc(sheet.notes[f.key])}</textarea>
       </section>`
   ).join('');
 
   return `
     <section class="card">
-      <h2 class="card-title">Biography</h2>
+      ${cardTitle('Biography')}
       <div class="biography-content">${sanitizeHtml(sheet.notes.biography)}</div>
     </section>
     ${fieldRows}

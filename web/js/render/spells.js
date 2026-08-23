@@ -1,7 +1,7 @@
 // The Spells tab: slot pips per level, and the spell list grouped by
 // level with a prepared toggle and a Cast button.
 
-import { esc, clamp } from '../util.js';
+import { esc, clamp, cardTitle } from '../util.js';
 import { slotPath, ITEM_PATH } from '../paths.js';
 
 function levelLabel(level) {
@@ -54,7 +54,7 @@ function template(sheet) {
   const listHtml = groups
     .map(([level, spells]) => `
       <section class="card">
-        <h2 class="card-title">${levelLabel(level)}</h2>
+        ${cardTitle(levelLabel(level))}
         <div class="spell-list">
           ${spells
             .map(
@@ -65,7 +65,7 @@ function template(sheet) {
                 <input type="checkbox" data-action="prepared" data-item="${esc(sp.itemId)}" ${sp.prepared ? 'checked' : ''}>
                 Prepared
               </label>
-              <button type="button" class="btn" data-action="cast" data-item="${esc(sp.itemId)}">Cast</button>
+              <button type="button" class="btn btn-roll" data-action="cast" data-item="${esc(sp.itemId)}">Cast</button>
             </div>`
             )
             .join('')}
@@ -76,7 +76,7 @@ function template(sheet) {
   return `
     ${sheet.spells.slots.length ? `
     <section class="card slots-card">
-      <h2 class="card-title">Spell Slots</h2>
+      ${cardTitle('Spell Slots')}
       ${slotsHtml}
     </section>` : ''}
     ${listHtml || '<p class="empty-note">No spells.</p>'}

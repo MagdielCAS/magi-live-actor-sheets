@@ -1,7 +1,7 @@
 // The Items tab: inventory with quantity steppers, an equipped toggle, a
 // use button when the item has uses, and the currency row.
 
-import { esc, clamp, commitOnBlurOrEnter } from '../util.js';
+import { esc, clamp, commitOnBlurOrEnter, cardTitle } from '../util.js';
 import { ITEM_PATH, currencyPath } from '../paths.js';
 
 const CURRENCY_KEYS = ['pp', 'gp', 'ep', 'sp', 'cp'];
@@ -46,7 +46,7 @@ function template(sheet) {
 
   return `
     <section class="card currency-card">
-      <h2 class="card-title">Currency</h2>
+      ${cardTitle('Currency')}
       <div class="currency-row">${currencyInputs}</div>
     </section>
     <section class="item-list">${rows}</section>

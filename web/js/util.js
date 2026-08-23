@@ -59,3 +59,9 @@ export function signed(n) {
   const num = Number(n) || 0;
   return num >= 0 ? `+${num}` : `${num}`;
 }
+
+// A card title: the words, then a gold hairline that runs from the end of
+// the words to the edge of the card.
+export function cardTitle(text) {
+  return `<h2 class="card-title">${esc(text)}<span class="card-title-rule" aria-hidden="true"></span></h2>`;
+}
