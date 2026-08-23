@@ -1,0 +1,11 @@
+/* The entry point for the design system tokens.
+   Link this file before styles.css. Do not change a value here: the seven
+   files below are the source of truth, and styles.css reads from them. */
+
+@import url("tokens/typography.css");
+@import url("tokens/colors.css");
+@import url("tokens/spacing.css");
+@import url("tokens/radius.css");
+@import url("tokens/elevation.css");
+@import url("tokens/motion.css");
+@import url("tokens/base.css");

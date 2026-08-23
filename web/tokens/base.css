@@ -1,0 +1,41 @@
+/* The resets the page depends on. Ported from web/styles.css. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--surface-page);
+  color: var(--text-body);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+}
+
+body { min-height: 100dvh; }
+
+h1, h2, h3, p { margin: 0; }
+
+button, input, textarea, select { font: inherit; color: inherit; }
+
+button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
+
+:where(a) { color: var(--text-action); text-decoration: none; }
+:where(a):hover { color: var(--arcane-300); text-decoration: underline; }
+
+:where(input, textarea, button, [tabindex]):focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
