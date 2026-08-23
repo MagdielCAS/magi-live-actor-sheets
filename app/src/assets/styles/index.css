@@ -1,27 +1,103 @@
+/* The four faces of the design system.
+ *
+ * This line is a copy of the one at the top of tokens/typography.css.
+ * Tailwind resolves every nested @import itself, and it drops a remote
+ * one on the way, so the request has to start at the entry file. The
+ * token file keeps its own copy, because web/ loads it directly.
+ *
+ * The relay allows fonts.googleapis.com in style-src and
+ * fonts.gstatic.com in font-src. Every family also names a fallback, so
+ * a table with no route to the internet still reads. */
+@import url("https://fonts.googleapis.com/css2?family=Marcellus&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Semi+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap");
+
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
 @import './tokens.css';
 
-/* The page is dark and fills the screen of a phone, below the notch and
-   above the home bar. index.html carries viewport-fit=cover, which is what
-   makes the env() values real. */
+/* tokens/base.css holds the reset, the body type, the focus ring and the
+   reduced-motion block. index.html carries viewport-fit=cover, which is
+   what makes the env() values in tokens/spacing.css real. Only what the
+   page adds to all of that is below. */
+
+/* Two faces of the design system that Tailwind does not name. The token
+   holds the value; this only makes it reachable from a template. */
+
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+@utility font-numeric {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A card title, and the gold hairline that runs from the end of it to the
+   edge of the card. SheetCard.vue draws both. */
+
+@utility card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--text-brand);
+}
+
+@utility rule-brand {
+  flex: 1;
+  height: var(--border-width);
+  background: var(--rule-brand);
+}
+
+@utility rule-brand-reverse {
+  flex: 1;
+  height: var(--border-width);
+  background: var(--rule-brand-reverse);
+}
+
+/* Hover is a wash, and a press is a short scale. A phone has no pointer,
+   so the wash is for a mouse only: without the guard it sticks to the
+   last control a finger touched. */
+
 @layer base {
-  html,
-  body {
-    width: 100%;
-    overflow-x: hidden;
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+  @media (hover: hover) {
+    button:hover:not(:disabled),
+    a:hover {
+      background-image: linear-gradient(var(--fill-hover), var(--fill-hover));
+    }
   }
 
-  body {
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
+  button:active:not(:disabled),
+  a:active {
+    transform: scale(var(--press-scale));
+    background-image: linear-gradient(var(--fill-press), var(--fill-press));
   }
 
-  /* A tap must not select text on a control. */
   button {
-    -webkit-tap-highlight-color: transparent;
+    transition: var(--transition-color), var(--transition-transform);
   }
+
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+/* The 11px caps of a stat label. The design system keeps a label at 11px
+   and never smaller, and body text at 13px and never smaller. */
+
+@utility text-2xs {
+  font-size: var(--text-2xs);
+}
+
+@utility stat-label {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--text-muted);
 }

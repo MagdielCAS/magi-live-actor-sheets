@@ -10,6 +10,9 @@
 //
 //   phone   a fixed bar at the bottom, inside the reach of a thumb
 //   desktop a fixed rail on the left, and a column of contained width
+//
+// The design system holds one breakpoint. It is 700px, and tokens.css
+// gives that number to Tailwind, so md: is that breakpoint everywhere.
 
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
@@ -24,7 +27,8 @@ const showChrome = computed(() => route.meta['chrome'] !== false)
   <div class="flex min-h-[100dvh] flex-col bg-background text-foreground md:flex-row">
     <DesktopSidebar
       v-if="showChrome"
-      class="hidden md:flex md:w-60 md:shrink-0 md:flex-col md:border-r md:border-border"
+      class="hidden md:flex md:w-[var(--rail-width)] md:shrink-0 md:flex-col
+             md:border-r md:border-border"
     />
 
     <div class="flex min-w-0 flex-1 flex-col">
@@ -33,10 +37,10 @@ const showChrome = computed(() => route.meta['chrome'] !== false)
       <!-- The feed. Contained width on a desktop, full width on a phone.
            The bottom padding clears the fixed bar and the iOS home bar. -->
       <main
-        class="mx-auto w-full max-w-3xl flex-1 px-4"
+        class="mx-auto w-full max-w-[var(--panel-max)] flex-1 px-3"
         :class="
           showChrome
-            ? 'pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px)+1rem)] pt-3 md:pb-8'
+            ? 'pb-[calc(var(--tabbar-height)+var(--safe-bottom)+var(--gutter))] pt-3 md:pb-6'
             : 'flex items-center justify-center'
         "
       >

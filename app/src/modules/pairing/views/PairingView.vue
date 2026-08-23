@@ -39,13 +39,19 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <div class="w-full max-w-sm">
-    <h1 class="text-center text-2xl font-semibold">Magi Live Sheet</h1>
-    <p class="mt-2 text-center text-sm text-muted-foreground">
+  <!-- The pairing box is the one box of the page with a 16px corner. -->
+  <div class="w-full max-w-[var(--pairing-max)] rounded-2xl border border-border bg-card p-7">
+    <!-- A centred title takes a gold rule on each side. -->
+    <h1 class="card-title font-display text-2xl normal-case tracking-normal">
+      <span class="rule-brand" aria-hidden="true" />
+      Magi Live Sheet
+      <span class="rule-brand-reverse" aria-hidden="true" />
+    </h1>
+    <p class="mt-2.5 text-center text-sm text-muted-foreground">
       Enter the 6-digit code from your GM's screen.
     </p>
 
-    <form class="mt-6 flex flex-col gap-3" autocomplete="off" @submit.prevent="submit">
+    <form class="mt-5 flex flex-col gap-3" autocomplete="off" @submit.prevent="submit">
       <input
         v-model="code"
         type="text"
@@ -55,20 +61,20 @@ async function submit(): Promise<void> {
         placeholder="000000"
         aria-label="Pairing code"
         required
-        class="w-full rounded-lg border border-input bg-card px-4 py-3 text-center text-2xl
-               tracking-[0.4em] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        class="w-full rounded-sm border border-input bg-sunken px-4 py-3 text-center
+               font-mono text-3xl tracking-[var(--tracking-code)]"
       >
       <button
         type="submit"
         :disabled="busy"
-        class="w-full rounded-lg bg-primary px-4 py-3 font-medium text-primary-foreground
-               disabled:opacity-60"
+        class="min-h-[var(--touch-big)] w-full rounded-md border border-primary bg-primary
+               px-4 text-base font-semibold text-primary-foreground"
       >
         {{ busy ? 'Pairing…' : 'Pair' }}
       </button>
     </form>
 
-    <p v-if="error" role="alert" class="mt-3 text-center text-sm text-destructive">
+    <p v-if="error" role="alert" class="mt-3 min-h-5 text-center text-sm text-destructive">
       {{ error }}
     </p>
   </div>

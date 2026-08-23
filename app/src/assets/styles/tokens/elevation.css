@@ -1,0 +1,20 @@
+/* Elevation. The sheet separates surfaces with a hairline and a lighter fill,
+   not with drop shadows. Shadow is reserved for things that float over the
+   sheet: the toast, a sheet-over-sheet, and a die in the air. */
+
+:root {
+  --shadow-none: none;
+  --shadow-card: 0 1px 0 rgba(238, 240, 246, 0.03) inset;
+  --shadow-pop: 0 10px 30px -12px rgba(11, 13, 18, 0.9);
+  --shadow-float: 0 18px 44px -16px rgba(11, 13, 18, 0.95);
+  --shadow-die: 0 14px 28px -10px rgba(11, 13, 18, 0.9);
+
+  --glow-arcane: 0 0 0 1px var(--arcane-500), 0 0 18px -4px rgba(124, 158, 255, 0.6);
+  --glow-gold: 0 0 0 1px var(--gold-500), 0 0 18px -4px rgba(243, 179, 88, 0.55);
+  --glow-crit: 0 0 24px -4px rgba(62, 207, 142, 0.75);
+
+  --focus-ring: 2px solid var(--arcane-500);
+  --focus-offset: 1px;
+
+  --blur-scrim: blur(10px); /* @kind other */
+}
