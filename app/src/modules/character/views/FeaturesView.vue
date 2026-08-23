@@ -13,22 +13,20 @@ const combat = useCombatStore()
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <section v-if="character.conditions.length" class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Conditions</h2>
+  <div class="flex flex-col gap-3">
+    <SheetCard v-if="character.conditions.length" title="Conditions">
       <div class="flex flex-wrap gap-2">
         <span
           v-for="condition in character.conditions"
           :key="condition.key"
-          class="rounded-full bg-warning/15 px-3 py-1 text-xs text-warning"
+          class="rounded-xs bg-[var(--fill-brand)] px-2.5 py-1 text-xs font-semibold text-brand"
         >
           {{ condition.label }}
         </span>
       </div>
-    </section>
+    </SheetCard>
 
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Features</h2>
+    <SheetCard title="Features">
       <ul class="flex flex-col divide-y divide-border">
         <li
           v-for="feature in character.features"
@@ -39,7 +37,8 @@ const combat = useCombatStore()
           <button
             v-if="feature.uses"
             type="button"
-            class="rounded bg-secondary px-3 py-1.5 text-xs tabular-nums"
+            class="font-numeric min-h-[var(--touch-min)] shrink-0 rounded-md border
+                   border-border bg-secondary px-3 text-sm font-bold text-primary"
             @click="combat.use(feature.itemId)"
           >
             Use ({{ feature.uses.value }}/{{ feature.uses.max }})
@@ -49,6 +48,6 @@ const combat = useCombatStore()
       <p v-if="character.features.length === 0" class="text-sm text-muted-foreground">
         No features.
       </p>
-    </section>
+    </SheetCard>
   </div>
 </template>

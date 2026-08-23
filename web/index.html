@@ -11,7 +11,12 @@
 <!-- The icon is inline, because the page must not request an external file. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312141a'/%3E%3Cpath d='M8 23V9l8 9 8-9v14' fill='none' stroke='%237aa2ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312141a'/%3E%3Cpath d='M8 23V9l8 9 8-9v14' fill='none' stroke='%237aa2ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<!-- The tokens come first. styles.css reads every value from them. -->
+<link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="styles.css">
+<!-- The icons. This is a classic script, so it runs before the module below
+     and window.lucide exists when the page draws. -->
+<script src="vendor/lucide.js"></script>
 </head>
 <body>
 
@@ -21,7 +26,11 @@
 
   <section id="pairing" class="pairing">
     <div class="pairing-box">
-      <h1 class="pairing-title">Magi Live Sheet</h1>
+      <h1 class="pairing-title">
+        <span class="title-rule" aria-hidden="true"></span>
+        <span class="title-text">Magi Live Sheet</span>
+        <span class="title-rule title-rule-end" aria-hidden="true"></span>
+      </h1>
       <p class="pairing-hint">Enter the 6-digit code from your GM's screen.</p>
       <form id="pairing-form" autocomplete="off">
         <input
@@ -55,13 +64,32 @@
 
 <div id="toast" class="toast" aria-live="polite"></div>
 
+<!-- Each icon keeps its word. The icon is decoration, the word is the name. -->
 <nav id="tabbar" class="tabbar hidden" aria-label="Sheet tabs">
-  <button type="button" class="tab-btn active" data-tab="main">Main</button>
-  <button type="button" class="tab-btn" data-tab="skills">Skills</button>
-  <button type="button" class="tab-btn" data-tab="combat">Combat</button>
-  <button type="button" class="tab-btn" data-tab="spells">Spells</button>
-  <button type="button" class="tab-btn" data-tab="items">Items</button>
-  <button type="button" class="tab-btn" data-tab="notes">Notes</button>
+  <button type="button" class="tab-btn active" data-tab="main">
+    <span class="tab-icon" data-lucide="heart-pulse"></span>
+    <span class="tab-label">Main</span>
+  </button>
+  <button type="button" class="tab-btn" data-tab="skills">
+    <span class="tab-icon" data-lucide="scroll-text"></span>
+    <span class="tab-label">Skills</span>
+  </button>
+  <button type="button" class="tab-btn" data-tab="combat">
+    <span class="tab-icon" data-lucide="swords"></span>
+    <span class="tab-label">Combat</span>
+  </button>
+  <button type="button" class="tab-btn" data-tab="spells">
+    <span class="tab-icon" data-lucide="sparkles"></span>
+    <span class="tab-label">Spells</span>
+  </button>
+  <button type="button" class="tab-btn" data-tab="items">
+    <span class="tab-icon" data-lucide="backpack"></span>
+    <span class="tab-label">Items</span>
+  </button>
+  <button type="button" class="tab-btn" data-tab="notes">
+    <span class="tab-icon" data-lucide="notebook-pen"></span>
+    <span class="tab-label">Notes</span>
+  </button>
 </nav>
 
 <script type="module" src="app.js"></script>

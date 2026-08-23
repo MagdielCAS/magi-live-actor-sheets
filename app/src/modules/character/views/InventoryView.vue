@@ -14,6 +14,8 @@ const character = useCharacterStore()
 
 const COINS: readonly CurrencyKey[] = ['pp', 'gp', 'ep', 'sp', 'cp']
 
+const STEPPER = 'size-[var(--touch-min)] rounded-md border border-border bg-secondary text-lg'
+
 function writeCoin(key: CurrencyKey, value: number): void {
   void character.patchActor({ [currencyPath(key)]: value }, [
     { path: ['currency', key], value },
@@ -30,25 +32,24 @@ function setQuantity(itemId: string, qty: number): void {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Currency</h2>
-      <div class="grid grid-cols-5 gap-2">
+  <div class="flex flex-col gap-3">
+    <SheetCard title="Currency">
+      <!-- Above the breakpoint the money row is capped and centred. -->
+      <div class="mx-auto grid max-w-[420px] grid-cols-5 gap-2">
         <NumberField
           v-for="coin in COINS"
           :key="coin"
-          :label="coin.toUpperCase()"
+          :label="coin"
           :read="() => character.currency?.[coin] ?? 0"
           :max="999999"
           :write="(v) => writeCoin(coin, v)"
         />
       </div>
-    </section>
+    </SheetCard>
 
     <!-- TODO: wrap this list in useVirtualRows() before it can hold
          hundreds of items. -->
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Inventory</h2>
+    <SheetCard title="Inventory">
       <ul class="flex flex-col divide-y divide-border">
         <li
           v-for="item in character.inventory"
@@ -56,20 +57,20 @@ function setQuantity(itemId: string, qty: number): void {
           class="flex items-center gap-3 py-2"
         >
           <span class="min-w-0 flex-1 truncate text-sm">{{ item.name }}</span>
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-2.5">
             <button
               type="button"
               aria-label="One less"
-              class="size-8 rounded bg-secondary"
+              :class="STEPPER"
               @click="setQuantity(item.itemId, Math.max(0, item.qty - 1))"
             >
               −
             </button>
-            <span class="w-8 text-center text-sm tabular-nums">{{ item.qty }}</span>
+            <span class="font-numeric w-8 text-center font-bold">{{ item.qty }}</span>
             <button
               type="button"
               aria-label="One more"
-              class="size-8 rounded bg-secondary"
+              :class="STEPPER"
               @click="setQuantity(item.itemId, Math.min(999, item.qty + 1))"
             >
               +
@@ -77,6 +78,6 @@ function setQuantity(itemId: string, qty: number): void {
           </div>
         </li>
       </ul>
-    </section>
+    </SheetCard>
   </div>
 </template>

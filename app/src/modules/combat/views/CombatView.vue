@@ -26,20 +26,23 @@ const ADVANTAGE: readonly { value: Advantage; label: string }[] = [
   { value: 'normal', label: 'Normal' },
   { value: 'advantage', label: 'Adv' },
 ]
+
+const ACTION = 'min-h-[var(--touch-min)] rounded-md border border-border bg-secondary '
+  + 'px-3 text-sm font-semibold text-primary'
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <!-- Status bar -->
-    <section class="rounded-xl border border-border bg-card p-4">
+  <div class="flex flex-col gap-3">
+    <SheetCard title="Hit points">
       <div class="flex items-baseline justify-between">
-        <h2 class="text-sm font-medium text-muted-foreground">Hit points</h2>
-        <p class="tabular-nums">
-          <span class="text-2xl font-semibold">{{ combat.hp?.value ?? '—' }}</span>
-          <span class="text-muted-foreground"> / {{ combat.hp?.max ?? '—' }}</span>
-          <span v-if="(combat.hp?.temp ?? 0) > 0" class="text-success">
-            +{{ combat.hp?.temp }}
-          </span>
+        <p class="font-numeric">
+          <span class="text-4xl font-bold">{{ combat.hp?.value ?? '—' }}</span>
+          <span class="text-2xl text-faint"> / </span>
+          <span class="text-2xl text-muted-foreground">{{ combat.hp?.max ?? '—' }}</span>
+        </p>
+        <!-- Temporary hit points are a gift, so they read as vital. -->
+        <p v-if="(combat.hp?.temp ?? 0) > 0" class="font-numeric text-lg font-bold text-success">
+          +{{ combat.hp?.temp }} temp
         </p>
       </div>
 
@@ -47,10 +50,10 @@ const ADVANTAGE: readonly { value: Advantage; label: string }[] = [
         <div
           v-for="slot in combat.spellSlots"
           :key="slotKey(slot)"
-          class="flex items-center gap-2 text-xs"
+          class="flex items-center gap-2 text-sm"
         >
           <span class="w-28 shrink-0 text-muted-foreground">{{ slotLabel(slot) }}</span>
-          <span class="tabular-nums">{{ slot.value }} / {{ slot.max }}</span>
+          <span class="font-numeric font-bold">{{ slot.value }} / {{ slot.max }}</span>
         </div>
       </div>
 
@@ -58,65 +61,60 @@ const ADVANTAGE: readonly { value: Advantage; label: string }[] = [
         <span
           v-for="condition in combat.conditions"
           :key="condition.key"
-          class="rounded-full bg-warning/15 px-3 py-1 text-xs text-warning"
+          class="rounded-xs bg-[var(--fill-brand)] px-2.5 py-1 text-xs font-semibold text-brand"
         >
           {{ condition.label }}
         </span>
       </div>
-    </section>
+    </SheetCard>
 
     <!-- The advantage of the next roll. It goes back to normal after one. -->
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Next roll</h2>
-      <div role="group" aria-label="Advantage" class="flex gap-1 rounded-lg bg-secondary p-1">
+    <SheetCard title="Next roll">
+      <div
+        role="group"
+        aria-label="Advantage"
+        class="flex overflow-hidden rounded-md border border-border"
+      >
         <button
           v-for="option in ADVANTAGE"
           :key="option.value"
           type="button"
-          class="flex-1 rounded-md py-2 text-sm"
-          :class="combat.advantage === option.value ? 'bg-card text-foreground' : 'text-muted-foreground'"
+          class="min-h-[var(--touch-min)] flex-1 border-l border-border px-1 text-sm
+                 first:border-l-0"
+          :class="
+            combat.advantage === option.value
+              ? 'bg-primary font-bold text-primary-foreground'
+              : 'bg-sunken text-foreground'
+          "
           @click="combat.setAdvantage(option.value)"
         >
           {{ option.label }}
         </button>
       </div>
-    </section>
+    </SheetCard>
 
-    <!-- Quick actions -->
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Actions</h2>
+    <SheetCard title="Actions">
       <div class="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          class="rounded-lg bg-secondary py-3 text-sm"
-          @click="combat.rollInitiative()"
-        >
+        <button type="button" :class="ACTION" @click="combat.rollInitiative()">
           Initiative
         </button>
         <!-- Both of these are in the protocol and had no UI in the old
              page. -->
         <button
           type="button"
-          class="rounded-lg bg-secondary py-3 text-sm"
+          :class="ACTION"
           :disabled="!combat.isDying"
-          :class="combat.isDying ? '' : 'opacity-50'"
           @click="combat.rollDeathSave()"
         >
           Death save
         </button>
-        <button
-          type="button"
-          class="col-span-2 rounded-lg bg-secondary py-3 text-sm"
-          @click="combat.rollHitDie('d10')"
-        >
+        <button type="button" class="col-span-2" :class="ACTION" @click="combat.rollHitDie('d10')">
           Hit die
         </button>
       </div>
-    </section>
+    </SheetCard>
 
-    <!-- Attacks -->
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Attacks</h2>
+    <SheetCard title="Attacks">
       <ul class="flex flex-col divide-y divide-border">
         <li
           v-for="attack in character.attacks"
@@ -124,21 +122,25 @@ const ADVANTAGE: readonly { value: Advantage; label: string }[] = [
           class="flex items-center gap-2 py-2"
         >
           <div class="min-w-0 flex-1">
-            <p class="truncate text-sm">{{ attack.name }}</p>
-            <p class="truncate text-xs text-muted-foreground">
+            <p class="truncate text-base font-bold">{{ attack.name }}</p>
+            <!-- A to-hit and a damage formula are dice, so they are set in
+                 the mono face. -->
+            <p class="truncate font-mono text-sm text-muted-foreground">
               {{ attack.toHit }} · {{ attack.damage }}
             </p>
           </div>
           <button
             type="button"
-            class="rounded bg-secondary px-3 py-1.5 text-xs"
+            :class="ACTION"
             @click="combat.rollAttack(attack.itemId)"
           >
             Attack
           </button>
+          <!-- Damage is blood, everywhere on the sheet. -->
           <button
             type="button"
-            class="rounded bg-secondary px-3 py-1.5 text-xs"
+            class="min-h-[var(--touch-min)] rounded-md border border-destructive
+                   bg-[var(--fill-damage)] px-3 text-sm font-semibold text-[var(--blood-300)]"
             @click="combat.rollDamage(attack.itemId)"
           >
             Damage
@@ -148,6 +150,6 @@ const ADVANTAGE: readonly { value: Advantage; label: string }[] = [
       <p v-if="character.attacks.length === 0" class="text-sm text-muted-foreground">
         No attacks.
       </p>
-    </section>
+    </SheetCard>
   </div>
 </template>

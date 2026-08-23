@@ -55,6 +55,8 @@ function init() {
   }
   wireTabBar();
   wirePairingForm();
+  // Draw the tab bar glyphs. vendor/lucide.js runs before this module.
+  lucide.createIcons();
 
   if (isFixture) {
     startFixture();

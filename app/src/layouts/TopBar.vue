@@ -13,7 +13,7 @@ const character = useCharacterStore()
 
 <template>
   <header
-    class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2"
+    class="flex items-center gap-3 px-3 pt-[calc(var(--safe-top)+0.5rem)] pb-2"
   >
     <!-- The desktop rail already shows all of this. -->
     <template v-if="character.loaded">
@@ -21,17 +21,18 @@ const character = useCharacterStore()
         v-if="character.img"
         :src="character.img"
         alt=""
-        class="size-9 shrink-0 rounded-full object-cover md:hidden"
+        class="size-9 shrink-0 rounded-full border border-border object-cover md:hidden"
       >
       <div
         v-else
-        class="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary
-               text-xs md:hidden"
+        class="flex size-9 shrink-0 items-center justify-center rounded-full border
+               border-border bg-secondary text-xs font-bold text-muted-foreground md:hidden"
       >
         {{ initials(character.name) }}
       </div>
       <div class="min-w-0 flex-1 md:hidden">
-        <p class="truncate text-sm font-medium">{{ character.name }}</p>
+        <!-- The name of the character is what the game gives you. -->
+        <p class="truncate font-display text-lg leading-snug text-brand">{{ character.name }}</p>
         <p class="truncate text-xs text-muted-foreground">
           {{ character.header?.classes }}<span v-if="character.header?.race">
             · {{ character.header.race }}</span>

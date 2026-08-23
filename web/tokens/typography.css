@@ -1,0 +1,52 @@
+/* Type. The shipped product uses the system sans only; the display serif and
+   the mono face are additions of this design system, taken from Google Fonts
+   because the repository ships no font binaries. See readme.md > Fonts. */
+@import url("https://fonts.googleapis.com/css2?family=Marcellus&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Semi+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap");
+
+:root {
+  /* Families */
+  --font-display: "Marcellus", "Iowan Old Style", Georgia, serif;
+  --font-ui: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-numeric: "Barlow Semi Condensed", "Barlow", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* The exact stack the product ships today. Kept so a recreation can match it. */
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+
+  /* Sizes — every one of these is a size the sheet actually uses. */
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 22px;
+  --text-3xl: 28px;
+  --text-4xl: 30px;
+  --text-display: 40px;
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-label: 0.04em;
+  --tracking-caps: 0.06em;
+  --tracking-code: 0.3em;
+
+  /* Semantic type roles */
+  --type-hero: var(--weight-regular) var(--text-display) / var(--leading-tight) var(--font-display);
+  --type-title: var(--weight-regular) var(--text-2xl) / var(--leading-snug) var(--font-display);
+  --type-name: var(--weight-bold) var(--text-xl) / var(--leading-snug) var(--font-ui);
+  --type-body: var(--weight-regular) var(--text-base) / var(--leading-normal) var(--font-ui);
+  --type-label: var(--weight-bold) var(--text-xs) / 1 var(--font-ui);
+  --type-stat: var(--weight-bold) var(--text-lg) / 1 var(--font-numeric);
+  --type-readout: var(--weight-bold) var(--text-4xl) / 1 var(--font-numeric);
+  --type-formula: var(--weight-regular) var(--text-sm) / 1.2 var(--font-mono);
+}

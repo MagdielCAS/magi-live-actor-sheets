@@ -1,0 +1,15 @@
+/* Corner radii. Small controls are tighter than the cards that hold them. */
+
+:root {
+  --radius-xs: 6px;
+  --radius-sm: 8px;   /* inputs */
+  --radius-md: 10px;  /* buttons, steppers, segmented */
+  --radius-lg: 12px;  /* stat chips, ability cards */
+  --radius-xl: 14px;  /* cards */
+  --radius-2xl: 16px; /* the pairing box */
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  --border-width: 1px;
+  --border-width-thick: 2px; /* pips and proficiency dots */
+}

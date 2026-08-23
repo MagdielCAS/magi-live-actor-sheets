@@ -22,7 +22,7 @@ const character = useCharacterStore()
       </KeepAlive>
     </RouterView>
   </div>
-  <p v-else class="py-12 text-center text-sm text-muted-foreground">
+  <p v-else class="py-8 text-center text-sm text-muted-foreground">
     Waiting for the sheet…
   </p>
 </template>

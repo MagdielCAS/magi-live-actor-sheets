@@ -1,7 +1,7 @@
 // The Skills tab: six abilities (check and save), all skills, tools, and
 // an advantage/disadvantage selector for the next roll.
 
-import { esc, signed } from '../util.js';
+import { esc, signed, cardTitle } from '../util.js';
 
 // This selector applies to the next roll only. It lives here, not in the
 // sheet, and it resets to "normal" once a roll is sent.
@@ -59,7 +59,7 @@ function template(sheet) {
 
   return `
     <div class="card advantage-card">
-      <h2 class="card-title">Next Roll</h2>
+      ${cardTitle('Next Roll')}
       <div class="segmented" role="group" aria-label="Advantage for the next roll">
         <button type="button" class="segmented-btn" data-mode="disadvantage">Disadvantage</button>
         <button type="button" class="segmented-btn" data-mode="normal">Normal</button>
@@ -68,18 +68,18 @@ function template(sheet) {
     </div>
 
     <section class="card">
-      <h2 class="card-title">Abilities</h2>
+      ${cardTitle('Abilities')}
       <div class="ability-grid">${abilityRows}</div>
     </section>
 
     <section class="card">
-      <h2 class="card-title">Skills</h2>
+      ${cardTitle('Skills')}
       <div class="skill-list">${skillRows}</div>
     </section>
 
     ${sheet.tools.length ? `
     <section class="card">
-      <h2 class="card-title">Tools</h2>
+      ${cardTitle('Tools')}
       <div class="skill-list">${toolRows}</div>
     </section>` : ''}
   `;

@@ -16,8 +16,8 @@ function template(sheet) {
           <span class="attack-stats">${esc(a.toHit)} to hit · ${esc(a.damage)}</span>
         </div>
         <div class="attack-buttons">
-          <button type="button" class="btn" data-action="attack" data-item="${esc(a.itemId)}">Attack</button>
-          <button type="button" class="btn" data-action="damage" data-item="${esc(a.itemId)}">Damage</button>
+          <button type="button" class="btn btn-roll" data-action="attack" data-item="${esc(a.itemId)}">Attack</button>
+          <button type="button" class="btn btn-damage" data-action="damage" data-item="${esc(a.itemId)}">Damage</button>
           <button type="button" class="btn" data-action="use" data-item="${esc(a.itemId)}">Use</button>
         </div>
       </div>`

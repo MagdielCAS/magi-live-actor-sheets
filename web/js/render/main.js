@@ -1,7 +1,7 @@
 // The Main tab: identity, HP, core stats, death saves, exhaustion,
 // resources, and the chat composer.
 
-import { esc, signed, clamp, commitOnBlurOrEnter } from '../util.js';
+import { esc, signed, clamp, commitOnBlurOrEnter, cardTitle } from '../util.js';
 import { ACTOR_PATH, resourcePath } from '../paths.js';
 
 // Exhaustion is read-only. The dnd5e system calculates it from the
@@ -90,7 +90,7 @@ function template(sheet) {
     </section>
 
     <section class="card death-card">
-      <h2 class="card-title">Death Saves</h2>
+      ${cardTitle('Death Saves')}
       <div class="death-row">
         <span class="death-label">Success</span>
         <div class="pip-row">${deathPips(deathSaves.success, 'success')}</div>
@@ -102,7 +102,7 @@ function template(sheet) {
     </section>
 
     <section class="card exhaustion-card">
-      <h2 class="card-title">Exhaustion</h2>
+      ${cardTitle('Exhaustion')}
       <div class="readonly-row">
         <span class="stepper-value">${getExhaustion(sheet)}</span>
         <span class="readonly-note">Change this in Foundry</span>
@@ -111,12 +111,12 @@ function template(sheet) {
 
     ${resources.length ? `
     <section class="card resources-card">
-      <h2 class="card-title">Resources</h2>
+      ${cardTitle('Resources')}
       ${resourceRows}
     </section>` : ''}
 
     <section class="card chat-card">
-      <h2 class="card-title">Chat</h2>
+      ${cardTitle('Chat')}
       <div class="chat-row">
         <input type="text" id="chat-text" class="chat-input" placeholder="Say something...">
         <button type="button" class="btn" data-action="chat-send">Send</button>

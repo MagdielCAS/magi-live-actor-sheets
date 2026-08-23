@@ -4,6 +4,10 @@
 // This tab is written out rather than left as a stub, because it is the
 // one that proves the write guard: the hit point fields are the exact
 // fields that produced more than 600 writes in the old page.
+//
+// Two accents carry the meaning here. Arcane marks what rolls: the
+// initiative chip, an ability check, a skill row. Gold marks what the
+// class gives you: expertise on the proficiency dot.
 
 import { computed } from 'vue'
 import { useCharacterStore } from '@/stores/character'
@@ -21,19 +25,21 @@ function writeHp(path: string, key: 'value' | 'max' | 'temp', value: number): vo
   void character.patchActor({ [path]: value }, [{ path: ['hp', key], value }])
 }
 
+// The proficiency ramp of the design system: none, half, full, expertise.
 const PROFICIENCY_DOT: Record<number, string> = {
-  0: 'bg-transparent border border-border',
-  0.5: 'bg-muted-foreground/50',
-  1: 'bg-primary',
-  2: 'bg-success',
+  0: 'bg-transparent border-2 border-faint',
+  0.5: 'bg-[var(--prof-half)] border-2 border-[var(--prof-half)]',
+  1: 'bg-[var(--prof-full)] border-2 border-[var(--prof-full)]',
+  2: 'bg-[var(--prof-expert)] border-2 border-[var(--prof-expert)]',
 }
+
+const CHIP = 'flex min-h-[var(--touch-big)] flex-col items-center justify-center gap-0.5 '
+  + 'rounded-lg border border-border bg-card px-1.5 py-2'
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <!-- Hit points -->
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Hit points</h2>
+  <div class="flex flex-col gap-3">
+    <SheetCard title="Hit points">
       <div class="grid grid-cols-3 gap-3">
         <NumberField
           label="Current"
@@ -54,31 +60,28 @@ const PROFICIENCY_DOT: Record<number, string> = {
           :write="(v) => writeHp(ACTOR_PATH.hpTemp, 'temp', v)"
         />
       </div>
-    </section>
+    </SheetCard>
 
-    <!-- The numbers the system derives. All read-only. -->
+    <!-- The numbers the system derives. All read-only, except the chip
+         that rolls, which wears the arcane accent to say so. -->
     <section class="grid grid-cols-4 gap-2">
-      <div class="rounded-lg border border-border bg-card px-2 py-3 text-center">
-        <p class="text-xs text-muted-foreground">AC</p>
-        <p class="text-lg font-semibold tabular-nums">{{ header?.ac ?? '—' }}</p>
+      <div :class="CHIP">
+        <p class="stat-label">AC</p>
+        <p class="font-numeric text-lg font-bold">{{ header?.ac ?? '—' }}</p>
       </div>
-      <button
-        type="button"
-        class="rounded-lg border border-border bg-card px-2 py-3 text-center"
-        @click="combat.rollInitiative()"
-      >
-        <p class="text-xs text-muted-foreground">Init</p>
-        <p class="text-lg font-semibold tabular-nums text-primary">
+      <button type="button" :class="CHIP" @click="combat.rollInitiative()">
+        <p class="stat-label">Init</p>
+        <p class="font-numeric text-lg font-bold text-primary">
           {{ header ? signed(header.initiative) : '—' }}
         </p>
       </button>
-      <div class="rounded-lg border border-border bg-card px-2 py-3 text-center">
-        <p class="text-xs text-muted-foreground">Speed</p>
-        <p class="text-lg font-semibold">{{ header?.speed ?? '—' }}</p>
+      <div :class="CHIP">
+        <p class="stat-label">Speed</p>
+        <p class="font-numeric text-lg font-bold">{{ header?.speed ?? '—' }}</p>
       </div>
-      <div class="rounded-lg border border-border bg-card px-2 py-3 text-center">
-        <p class="text-xs text-muted-foreground">Prof</p>
-        <p class="text-lg font-semibold tabular-nums">
+      <div :class="CHIP">
+        <p class="stat-label">Prof</p>
+        <p class="font-numeric text-lg font-bold">
           {{ header ? signed(header.prof) : '—' }}
         </p>
       </div>
@@ -87,38 +90,38 @@ const PROFICIENCY_DOT: Record<number, string> = {
     <!-- Exhaustion is read-only on purpose: prepareExhaustionLevel()
          writes it from the exhaustion condition, so a write here would
          quietly do nothing. -->
-    <section
-      v-if="(header?.exhaustion ?? 0) > 0"
-      class="rounded-xl border border-warning/40 bg-warning/10 p-4"
-    >
-      <p class="text-sm">
-        Exhaustion {{ header?.exhaustion }}
-        <span class="text-muted-foreground">· change this in Foundry</span>
+    <SheetCard v-if="(header?.exhaustion ?? 0) > 0" title="Exhaustion">
+      <p class="flex items-baseline gap-3 text-sm">
+        <span class="font-numeric text-lg font-bold">{{ header?.exhaustion }}</span>
+        <span class="text-muted-foreground">Change this in Foundry</span>
       </p>
-    </section>
+    </SheetCard>
 
-    <!-- Abilities -->
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Abilities</h2>
-      <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+    <SheetCard title="Abilities">
+      <div class="grid grid-cols-2 gap-2.5 md:grid-cols-3">
         <div
           v-for="ability in character.abilities"
           :key="ability.key"
-          class="rounded-lg bg-secondary p-3 text-center"
+          class="rounded-lg border border-border bg-secondary p-2.5"
         >
-          <p class="text-xs text-muted-foreground">{{ ability.label }}</p>
-          <p class="text-xl font-semibold tabular-nums">{{ ability.value }}</p>
-          <div class="mt-2 flex gap-1">
+          <div class="flex items-baseline justify-between">
+            <p class="text-sm text-muted-foreground">{{ ability.label }}</p>
+            <p class="font-numeric text-lg font-bold">{{ ability.value }}</p>
+          </div>
+          <div class="mt-2 flex gap-1.5">
             <button
               type="button"
-              class="flex-1 rounded bg-card py-1 text-xs"
+              class="min-h-[var(--touch-min)] flex-1 whitespace-nowrap rounded-md border
+                     border-border bg-secondary px-1 text-sm font-semibold text-primary"
               @click="combat.roll('ability', { key: ability.key })"
             >
-              {{ signed(ability.mod) }}
+              Check {{ signed(ability.mod) }}
             </button>
             <button
               type="button"
-              class="flex-1 rounded bg-card py-1 text-xs"
+              class="min-h-[var(--touch-min)] flex-1 whitespace-nowrap rounded-md border
+                     bg-secondary px-1 text-sm font-semibold text-primary"
+              :class="ability.proficient ? 'border-primary' : 'border-border'"
               @click="combat.roll('save', { key: ability.key })"
             >
               Save {{ signed(ability.save) }}
@@ -126,29 +129,30 @@ const PROFICIENCY_DOT: Record<number, string> = {
           </div>
         </div>
       </div>
-    </section>
+    </SheetCard>
 
-    <!-- Skills -->
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Skills</h2>
-      <ul class="flex flex-col">
+    <SheetCard title="Skills">
+      <ul class="flex flex-col gap-1.5">
         <li v-for="skill in character.skills" :key="skill.key">
           <button
             type="button"
-            class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm"
+            class="flex min-h-[var(--touch-min)] w-full items-center gap-2.5 rounded-md
+                   border border-border bg-sunken px-2.5 text-left text-sm"
             @click="combat.roll('skill', { key: skill.key })"
           >
             <span
-              class="size-2 shrink-0 rounded-full"
+              class="size-3.5 shrink-0 rounded-full"
               :class="PROFICIENCY_DOT[skill.proficiency]"
               :aria-label="`Proficiency ${skill.proficiency}`"
             />
             <span class="flex-1 truncate">{{ skill.label }}</span>
-            <span class="text-xs text-muted-foreground">{{ skill.ability }}</span>
-            <span class="w-8 text-right tabular-nums">{{ signed(skill.mod) }}</span>
+            <span class="stat-label">{{ skill.ability }}</span>
+            <span class="font-numeric w-8 text-right font-bold text-primary">
+              {{ signed(skill.mod) }}
+            </span>
           </button>
         </li>
       </ul>
-    </section>
+    </SheetCard>
   </div>
 </template>

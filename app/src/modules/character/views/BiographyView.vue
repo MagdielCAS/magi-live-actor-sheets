@@ -42,29 +42,22 @@ const fields = FIELDS.map((field) => ({
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <section class="rounded-xl border border-border bg-card p-4">
-      <h2 class="mb-3 text-sm font-medium text-muted-foreground">Biography</h2>
+  <div class="flex flex-col gap-3">
+    <SheetCard title="Biography">
       <!-- eslint-disable-next-line vue/no-v-html -- sanitizeHtml above. -->
-      <div class="prose-sm max-w-none text-sm leading-relaxed" v-html="biography" />
-    </section>
+      <div class="max-w-none text-base leading-normal" v-html="biography" />
+    </SheetCard>
 
-    <section
-      v-for="field in fields"
-      :key="field.key"
-      class="rounded-xl border border-border bg-card p-4"
-    >
-      <label class="flex flex-col gap-2">
-        <span class="text-sm font-medium text-muted-foreground">{{ field.label }}</span>
-        <textarea
-          v-model="field.state.model.value"
-          rows="3"
-          class="w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm
-                 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          @focus="field.state.onFocus"
-          @blur="field.state.onBlur"
-        />
-      </label>
-    </section>
+    <SheetCard v-for="field in fields" :key="field.key" :title="field.label">
+      <textarea
+        v-model="field.state.model.value"
+        rows="3"
+        :aria-label="field.label"
+        class="min-h-19 w-full resize-y rounded-sm border border-input bg-sunken px-2.5 py-2
+               text-sm"
+        @focus="field.state.onFocus"
+        @blur="field.state.onBlur"
+      />
+    </SheetCard>
   </div>
 </template>

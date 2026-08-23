@@ -15,22 +15,27 @@ const actorId = computed(() => (route.params['actorId'] as string | undefined) ?
 </script>
 
 <template>
-  <nav aria-label="Sheet tabs" class="gap-1 p-3">
+  <nav aria-label="Sheet tabs" class="gap-0.5 p-3 pt-[calc(var(--safe-top)+0.75rem)]">
     <div class="mb-4 flex items-center gap-3 px-2 py-2">
       <img
         v-if="character.img"
         :src="character.img"
         alt=""
-        class="size-10 shrink-0 rounded-full object-cover"
+        class="size-10 shrink-0 rounded-full border border-border object-cover"
       >
       <div
         v-else
-        class="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm"
+        class="flex size-10 shrink-0 items-center justify-center rounded-full border
+               border-border bg-secondary text-sm font-bold text-muted-foreground"
       >
         {{ initials(character.name) }}
       </div>
       <div class="min-w-0">
-        <p class="truncate text-sm font-medium">{{ character.name || 'Magi Live Sheet' }}</p>
+        <!-- The name of the character is what the game gives you, so it is
+             gold and it is the display face. -->
+        <p class="truncate font-display text-lg leading-snug text-brand">
+          {{ character.name || 'Magi Live Sheet' }}
+        </p>
         <p class="truncate text-xs text-muted-foreground">
           {{ character.header?.classes ?? '' }}
         </p>
@@ -42,10 +47,11 @@ const actorId = computed(() => (route.params['actorId'] as string | undefined) ?
         v-for="tab in SHEET_TABS"
         :key="tab.name"
         :to="{ name: tab.name, params: { actorId } }"
-        class="flex items-center rounded-md px-3 py-2 text-sm text-muted-foreground
-               transition-colors hover:bg-secondary hover:text-foreground"
-        active-class="bg-secondary text-foreground"
+        class="flex min-h-[var(--touch-min)] items-center gap-2.5 rounded-md px-3.5 text-sm
+               font-semibold text-muted-foreground no-underline transition-colors"
+        active-class="text-primary"
       >
+        <TabIcon :tab="tab.name" :size="18" />
         {{ tab.label }}
       </RouterLink>
     </template>

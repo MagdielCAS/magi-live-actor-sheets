@@ -1,0 +1,94 @@
+/* Colour. The ink and paper ramps and the four accents are the exact values
+   the product ships in web/styles.css. The gold ramp and the two deepest inks
+   are additions of this design system; see readme.md > Visual foundations. */
+
+:root {
+  /* Ink — the dark ramp, page to hairline. */
+  --ink-900: #0b0d12;
+  --ink-800: #12141a;
+  --ink-700: #1a1d26;
+  --ink-600: #1f2330;
+  --ink-500: #262b3b;
+  --ink-400: #2e3342;
+
+  /* Paper — text on ink. */
+  --paper-100: #eef0f6;
+  --paper-300: #9aa0b4;
+  --paper-500: #6b7185;
+
+  /* Arcane — the interactive accent. Every tappable roll wears it. */
+  --arcane-300: #a9c0ff;
+  --arcane-500: #7c9eff;
+  --arcane-700: #4a5b8f;
+  --arcane-ink: #0e1220;
+
+  /* Gold — the brand accent. Titles, proficiency, expertise, rest. */
+  --gold-300: #f8d296;
+  --gold-500: #f3b358;
+  --gold-700: #a97a30;
+  --gold-ink: #241a05;
+
+  /* Vital — healing, live connection, success. */
+  --vital-300: #a9f2d2;
+  --vital-500: #3ecf8e;
+  --vital-ink: #0e1a12;
+
+  /* Blood — damage, failure, offline. */
+  --blood-300: #ffb3ba;
+  --blood-500: #f0616f;
+  --blood-ink: #2a0a0d;
+
+  /* Surfaces */
+  --surface-page: var(--ink-800);
+  --surface-sunken: var(--ink-700);
+  --surface-card: var(--ink-600);
+  --surface-raised: var(--ink-500);
+  --surface-backdrop: var(--ink-900);
+  --surface-scrim: rgba(11, 13, 18, 0.72);
+
+  /* Text */
+  --text-body: var(--paper-100);
+  --text-muted: var(--paper-300);
+  --text-faint: var(--paper-500);
+  --text-action: var(--arcane-500);
+  --text-brand: var(--gold-500);
+
+  /* Lines */
+  --border-hairline: var(--ink-400);
+  --border-strong: var(--paper-500);
+  --border-action: var(--arcane-500);
+  --border-brand: var(--gold-500);
+
+  /* State fills — the translucent washes the sheet uses for heal and damage. */
+  --fill-heal: rgba(62, 207, 142, 0.18);
+  --fill-damage: rgba(240, 97, 111, 0.18);
+  --fill-arcane: rgba(124, 158, 255, 0.16);
+  --fill-brand: rgba(243, 179, 88, 0.14);
+  --fill-hover: rgba(238, 240, 246, 0.06);
+  --fill-press: rgba(238, 240, 246, 0.12);
+
+  /* Proficiency ramp — 0, half, full, expertise. */
+  --prof-none: transparent;
+  --prof-half: var(--arcane-700);
+  --prof-full: var(--arcane-500);
+  --prof-expert: var(--gold-500);
+
+  /* Rules — the gold hairline that flanks a title. */
+  --rule-brand: linear-gradient(90deg, transparent, var(--gold-700) 40%, var(--gold-500));
+  --rule-brand-reverse: linear-gradient(270deg, transparent, var(--gold-700) 40%, var(--gold-500));
+  --rule-hairline: var(--ink-400);
+
+  /* Dice — the faces the roller uses. */
+  --die-face: var(--ink-500);
+  --die-edge: var(--gold-700);
+  --die-crit: var(--vital-500);
+  --die-fumble: var(--blood-500);
+
+  /* One colour per die, so a set reads as a set and not as six of the same. */
+  --die-d4: #f3b358;
+  --die-d6: #3ecf8e;
+  --die-d8: #7c9eff;
+  --die-d10: #b98bff;
+  --die-d12: #f08f5a;
+  --die-d20: #f0616f;
+}

@@ -1,0 +1,40 @@
+/* Spacing and layout. The scale is the set of gaps the sheet already uses,
+   not an invented 4/8 grid — 6, 10 and 14 all appear in web/styles.css. */
+
+:root {
+  --space-0: 0px;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 14px;
+  --space-8: 16px;
+  --space-9: 20px;
+  --space-10: 24px;
+  --space-11: 28px;
+  --space-12: 32px;
+
+  /* Layout */
+  --panel-max: 720px;
+  --pairing-max: 360px;
+  --gutter: var(--space-6);
+  --card-gap: var(--space-6);
+  --tabbar-height: 64px;
+  --topbar-height: 52px;
+  --rail-width: 240px;
+  --tablet-breakpoint: 700px;
+
+  /* Touch. Nothing tappable goes below 44px. */
+  --touch-min: 44px;
+  --touch-big: 52px;
+  --touch-stepper: 40px;
+  --touch-pip: 26px;
+
+  /* Safe areas — the page is drawn under the notch and the home bar. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
