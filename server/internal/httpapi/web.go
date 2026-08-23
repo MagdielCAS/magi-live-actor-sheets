@@ -82,15 +82,22 @@ func setNoCache(w http.ResponseWriter) {
 	w.Header().Set("Cache-Control", "no-cache")
 }
 
-// setSecurityHeaders adds headers appropriate for a same-origin app that
-// loads no external resources.
+// setSecurityHeaders adds headers appropriate for a same-origin app.
 func setSecurityHeaders(w http.ResponseWriter) {
 	h := w.Header()
 	h.Set("X-Content-Type-Options", "nosniff")
-	// Scripts, styles, and connections stay on this origin. Images are the
-	// one exception: a portrait and an item icon come from the Foundry
-	// server, which is a different origin, and the page icon is a data URL.
-	// An image cannot run code, so this exception is safe.
+	// Scripts and connections stay on this origin. There are three
+	// exceptions, and each one is a thing that cannot run code:
+	//
+	//   img-src    a portrait and an item icon come from the Foundry
+	//              server, which is a different origin, and the page icon
+	//              is a data URL.
+	//   style-src  the design system asks Google Fonts for its four faces.
+	//   font-src   Google Fonts serves the font files from a second host.
+	//
+	// The icons are NOT an exception: they are served from this origin, so
+	// the page draws them with no route to the internet, and no third
+	// party can run code in a page that holds a session token.
 	//
 	// There is no 'unsafe-inline' and no 'unsafe-eval'. The build keeps
 	// every script and every style in its own file, and the page compiles
@@ -100,6 +107,8 @@ func setSecurityHeaders(w http.ResponseWriter) {
 	h.Set("Content-Security-Policy",
 		"default-src 'self'; "+
 			"img-src 'self' data: http: https:; "+
+			"style-src 'self' https://fonts.googleapis.com; "+
+			"font-src 'self' https://fonts.gstatic.com; "+
 			"object-src 'none'; "+
 			"base-uri 'self'; "+
 			"form-action 'self'; "+
