@@ -68,6 +68,46 @@ is reachable; `foundryvtt.com` and `foundryvtt.wiki` are blocked by the egress
 proxy. The core Foundry repo (`foundryvtt/foundryvtt`) is an issue tracker with
 no source, so **dnd5e's own usage is the best evidence for a v14 API**.
 
+### The design system is a source of truth, and it lives in two places
+
+`web/tokens/` and `app/src/assets/styles/tokens/` hold the same seven files.
+They carry every colour, size, radius, gap, duration and shadow the two pages
+use. **Do not change a value in them, and do not invent a token.** If a value
+has no token, take the nearest one that has.
+
+Four rules of the system are easy to undo by accident:
+
+- A card has a hairline and a lighter fill, and **no drop shadow**. Only the
+  toast floats, so only the toast has one.
+- A card title is 12px gold caps, and a gold hairline runs from the end of the
+  title to the edge of the card. A centred title takes one on each side.
+- The accents mean things. **Arcane** is what you can touch: a roll, the active
+  tab, the focus ring. **Gold** is the brand and what the game gives you: the
+  character name, a card title, expertise, a pact slot. **Vital** is heal and a
+  live connection. **Blood** is damage and offline. Never paint a control gold
+  to make it look important.
+- One breakpoint, at 700px. Below it a bottom bar, above it a 240px rail.
+
+Three details of the build that each cost a debugging round trip:
+
+- **Tailwind gets the scale by cascade, not by repetition.** The token files
+  write `--radius-*`, `--text-*` and `--font-mono` on `:root` outside every
+  layer, and an unlayered rule beats `@layer theme`. That is why
+  `rounded-xl` is the 14px of a card with no value written twice.
+- **`tokens/base.css` is imported with `layer(base)` in the app.** Unlayered
+  it would beat every utility, and its `:where(a)` rule would paint every
+  navigation link arcane with no way to take it back.
+- **Tailwind drops a remote `@import` that it finds inside a nested file.**
+  The Google Fonts line therefore also sits at the top of
+  `app/src/assets/styles/index.css`. Move it and the four faces disappear
+  with no error.
+
+The relay policy allows `fonts.googleapis.com` in `style-src` and
+`fonts.gstatic.com` in `font-src`, and nothing else new. **The icons are
+served from this origin**, from `web/vendor/lucide.js` and from the
+`@lucide/vue` package: a script from another host could read the session
+token, and a table can have no route to the internet.
+
 ### The write allowlist exists twice, on purpose
 
 `server/internal/authz/authz.go` and `module/scripts/authz.mjs` must hold the
